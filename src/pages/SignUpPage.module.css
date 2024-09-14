@@ -1,0 +1,72 @@
+.signUpPage {
+  background-color: #5251b5;
+  color: white;
+  opacity: 1;
+  transition: opacity 0.3s ease-out;
+}
+.fadeOut {
+  opacity: 0;
+}
+.signUpCard {
+  border: none;
+  box-shadow: none;
+  padding: 0;
+}
+.signUpFont {
+  font-weight: 700;
+  font-size: 28px;
+  line-height: 37.8px;
+}
+.dNone {
+  display: none;
+}
+.googleButton {
+  width: 314px;
+  height: 63px;
+  border: 1px solid #ebeaec;
+  border-radius: 38px;
+}
+.googleIcon {
+  width: 23.58px;
+  height: 24.06px;
+}
+.socialText {
+  display: inline;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 15.13px;
+  color: white;
+  text-transform: uppercase;
+}
+.dividerText {
+  font-weight: 700;
+  text-transform: uppercase;
+  line-height: 15.13px;
+  font-size: 14px;
+}
+.formFieldInput {
+  width: 314px;
+  height: 63px;
+  border-radius: 15px;
+  background-color: #f2f3f7;
+}
+.formButtonPrimary {
+  width: 293px;
+  height: 59.29px;
+  border-radius: 35.76px;
+  background-color: #8e97fd;
+  font-weight: 500;
+  text-transform: uppercase;
+  line-height: 14.24px;
+}
+.footerText {
+  font-weight: 500;
+  line-height: 15.13px;
+  font-size: 14px;
+  span {
+    a {
+      text-decoration: none;
+      color: #8e97fd;
+    }
+  }
+}
