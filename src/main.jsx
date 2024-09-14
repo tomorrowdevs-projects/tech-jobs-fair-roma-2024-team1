@@ -9,6 +9,11 @@ const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const localization = {
   dividerText: "OR LOG IN WITH EMAIL",
   formButtonPrimary: "Get started",
+  signIn: {
+    start: {
+      title: "Welcome",
+    },
+  },
 };
 
 if (!PUBLISHABLE_KEY) {

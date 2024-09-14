@@ -1,5 +1,5 @@
 import { SignUp } from "@clerk/clerk-react";
-import styles from "../pages/SignUpPage.module.css";
+import styles from "../Registration/SignUpPage.module.css";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 const SignUpPage = () => {
