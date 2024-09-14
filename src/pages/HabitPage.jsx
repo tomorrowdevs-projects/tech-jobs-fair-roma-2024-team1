@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Modal, Button, Form } from 'react-bootstrap';
 import styles from './HabitPage.module.css';
 
@@ -8,6 +8,11 @@ const HabitPage = () => {
   const [reminder, setReminder] = useState(false);
   const [habits, setHabits] = useState([]);
   const [newHabitName, setNewHabitName] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [hideCompleted, setHideCompleted] = useState(false);
+  const [sortBy, setSortBy] = useState('name');
+
+  const dropdownRef = useRef(null);
 
   const getCalendarDates = () => {
     const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -30,6 +35,19 @@ const HabitPage = () => {
     getCalendarDates();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   const handleModalToggle = () => setShowModal(!showModal);
 
   const handleSaveHabit = () => {
@@ -50,6 +68,30 @@ const HabitPage = () => {
     setHabits(updatedHabits);
   };
 
+  const toggleDropdown = () => setShowDropdown(!showDropdown);
+
+  const handleSortChange = (value) => {
+    setSortBy(value);
+    setShowDropdown(false);
+  };
+
+  const handleHideCompletedChange = () => {
+    setHideCompleted(!hideCompleted);
+  };
+
+  const sortedHabits = [...habits].sort((a, b) => {
+    if (sortBy === 'name') {
+      return a.name.localeCompare(b.name);
+    } else if (sortBy === 'frequency') {
+      return b.completions.filter(Boolean).length - a.completions.filter(Boolean).length;
+    }
+    return 0;
+  });
+
+  const filteredHabits = hideCompleted
+    ? sortedHabits.filter(habit => !habit.completions.every(Boolean))
+    : sortedHabits;
+
   return (
     <div className={`${styles.habitPage} min-vh-100 d-flex flex-column py-4 py-md-5`}>
       <div className="container">
@@ -63,11 +105,44 @@ const HabitPage = () => {
         
         <div className="d-flex justify-content-end mb-3">
           <button onClick={handleModalToggle} className={`${styles.btnCircle} me-4`}>+</button>
-          <button className={`${styles.btnCircle}`}>≡</button>
+          <div className="position-relative" ref={dropdownRef}>
+  <button onClick={toggleDropdown} className={`${styles.btnCircle}`}>
+    ☰
+  </button>
+  {showDropdown && (
+    <div className={`${styles.dropdownMenu} position-absolute end-0 mt-2 p-3 rounded shadow`}>
+      <div className={`${styles.dropdownItem} mb-3`}>
+        <input
+          type="checkbox"
+          className="form-check-input"
+          id="hideCompleted"
+          checked={hideCompleted}
+          onChange={handleHideCompletedChange}
+        />
+        <label className={`${styles.dropdownLabel}`} htmlFor="hideCompleted">
+          Nascondi completati
+        </label>
+      </div>
+      <div className={`${styles.dropdownItem} d-flex align-items-center`}>
+        <span className={`${styles.dropdownLabel} me-2`}>Ordina per:</span>
+        <select
+          value={sortBy}
+          onChange={(e) => handleSortChange(e.target.value)}
+          className={`${styles.customSelect}`}
+        >
+          <option value="name">Nome</option>
+          <option value="frequency">Frequenza</option>
+        </select>
+      </div>
+    </div>
+  )}
+</div>
+
         </div>
 
         <div className="row">
-          <div className="col-12">
+          <div className="col-12 d-flex justify-content-between align-items-center">
+            <h2>Your Habits</h2>
             <div className={`${styles.calendarStrip} d-flex justify-content-between mb-4 mt-4 p-2 rounded`}>
               {dates.map((item, index) => (
                 <div key={index} className={`${styles.calendarDay} text-center p-1 rounded ${item.isToday ? styles.today : ''}`}>
@@ -76,24 +151,25 @@ const HabitPage = () => {
                 </div>
               ))}
             </div>
-            {habits.map((habit, habitIndex) => (
-              <div key={habitIndex} className={`${styles.habitRow} d-flex align-items-center mb-3`}>
-                <div className={styles.habitName}>{habit.name}</div>
-                <div className={`${styles.completionStrip} d-flex justify-content-between`}>
-                  {habit.completions.map((completed, dateIndex) => (
-                    <button
-                      key={dateIndex}
-                      className={`${styles.completionButton} ${completed ? styles.completed : styles.notCompleted}`}
-                      onClick={() => toggleHabitCompletion(habitIndex, dateIndex)}
-                    >
-                      {completed ? '✔' : '×'}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
+
+        {filteredHabits.map((habit, habitIndex) => (
+          <div key={habitIndex} className={`${styles.habitRow} d-flex align-items-center mb-3`}>
+            <div className={styles.habitName}>{habit.name}</div>
+            <div className={`${styles.completionStrip} d-flex justify-content-between`}>
+              {habit.completions.map((completed, dateIndex) => (
+                <button
+                  key={dateIndex}
+                  className={`${styles.completionButton} ${completed ? styles.completed : styles.notCompleted}`}
+                  onClick={() => toggleHabitCompletion(habitIndex, dateIndex)}
+                >
+                  {completed ? '✔' : '×'}
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
         
         {habits.length === 0 && (
           <div className="flex-grow-1 d-flex align-items-center justify-content-center">
@@ -103,7 +179,6 @@ const HabitPage = () => {
           </div>
         )}
 
-        {/* Modal for adding new habit */}
         <Modal show={showModal} onHide={handleModalToggle} centered>
           <Modal.Header closeButton className={`${styles.modalHeader}`}>
             <Modal.Title>Create Habit</Modal.Title>
