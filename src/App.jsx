@@ -1,13 +1,14 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
-import PropTypes from 'prop-types';
+import PropTypes from "prop-types";
 import HabitPage from "./pages/HabitPage";
 import SignUpPage from "./pages/Registration/SignUpPage";
 import SignInPage from "./pages/SignIn/SignInPage";
+import MyNav from "./component/MyNav";
 
 function ProtectedRoute({ children }) {
   const { isSignedIn, isLoaded } = useAuth();
-  
+
   if (!isLoaded) {
     return <div>Loading...</div>;
   }
@@ -16,7 +17,12 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/signUp" replace />;
   }
 
-  return children;
+  return (
+    <>
+      <MyNav />
+      {children}
+    </>
+  );
 }
 
 ProtectedRoute.propTypes = {
