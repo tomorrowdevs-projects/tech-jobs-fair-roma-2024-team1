@@ -1,7 +1,7 @@
 .habitPage {
   background-color: #5251B5;
   color: white;
-  font-family: 'Poppins', sans-serif;
+  font-family: 'Rubik', sans-serif;
 }
 
 .pageTitle {
@@ -45,11 +45,11 @@
 
 .dateNumber {
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .dayName {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   opacity: 0.8;
 }
 

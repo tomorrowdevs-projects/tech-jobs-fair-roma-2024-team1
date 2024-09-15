@@ -106,43 +106,43 @@ const HabitPage = () => {
         <div className="d-flex justify-content-end mb-3">
           <button onClick={handleModalToggle} className={`${styles.btnCircle} me-4`}>+</button>
           <div className="position-relative" ref={dropdownRef}>
-  <button onClick={toggleDropdown} className={`${styles.btnCircle}`}>
-    ☰
-  </button>
-  {showDropdown && (
-    <div className={`${styles.dropdownMenu} position-absolute end-0 mt-2 p-3 rounded shadow`}>
-      <div className={`${styles.dropdownItem} mb-3`}>
-        <input
-          type="checkbox"
-          className="form-check-input"
-          id="hideCompleted"
-          checked={hideCompleted}
-          onChange={handleHideCompletedChange}
-        />
-        <label className={`${styles.dropdownLabel}`} htmlFor="hideCompleted">
-          Nascondi completati
-        </label>
-      </div>
-      <div className={`${styles.dropdownItem} d-flex align-items-center`}>
-        <span className={`${styles.dropdownLabel} me-2`}>Ordina per:</span>
-        <select
-          value={sortBy}
-          onChange={(e) => handleSortChange(e.target.value)}
-          className={`${styles.customSelect}`}
-        >
-          <option value="name">Nome</option>
-          <option value="frequency">Frequenza</option>
-        </select>
-      </div>
-    </div>
-  )}
-</div>
+            <button onClick={toggleDropdown} className={`${styles.btnCircle}`}>
+              ☰
+            </button>
+            {showDropdown && (
+              <div className={`${styles.dropdownMenu} position-absolute end-0 mt-2 p-3 rounded shadow`}>
+                <div className={`${styles.dropdownItem} mb-3`}>
+                  <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="hideCompleted"
+                  checked={hideCompleted}
+                  onChange={handleHideCompletedChange}
+                  />
+                  <label className={`${styles.dropdownLabel}`} htmlFor="hideCompleted">
+                  Hide completed
+                  </label>
+                </div>
+                <div className={`${styles.dropdownItem} d-flex align-items-center`}>
+                  <span className={`${styles.dropdownLabel} me-2`}>Sort:</span>
+                  <select
+                  value={sortBy}
+                  onChange={(e) => handleSortChange(e.target.value)}
+                  className={`${styles.customSelect}`}
+                  >
+                    <option value="name">Name</option>
+                    <option value="frequency">Frequency</option>
+                  </select>
+                </div>
+              </div>
+            )}
+        </div>
 
         </div>
 
         <div className="row">
           <div className="col-12 d-flex justify-content-between align-items-center">
-            <h2>Your Habits</h2>
+            <h2>Your habits</h2>
             <div className={`${styles.calendarStrip} d-flex justify-content-between mb-4 mt-4 p-2 rounded`}>
               {dates.map((item, index) => (
                 <div key={index} className={`${styles.calendarDay} text-center p-1 rounded ${item.isToday ? styles.today : ''}`}>
