@@ -29,15 +29,13 @@ public class User implements UserDetails {
     private UUID id;
     private String name;
     private String surname;
-    private String username;
     private String email;
     private String password;
 
 
-    public User(String name, String surname, String username, String email, String password) {
+    public User(String name, String surname, String email, String password) {
         this.name = name;
         this.surname = surname;
-        this.username = username;
         this.email = email;
         this.password = password;
     }
@@ -45,5 +43,10 @@ public class User implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
     }
 }

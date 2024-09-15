@@ -24,8 +24,7 @@ public class UserService {
     private UserRepository userRepository;
     @Autowired
     private PasswordEncoder bCrypt;
-    @Value("${USER_PASSWORD}")
-    private String userPassword;
+
 
 
 
@@ -40,9 +39,7 @@ public class UserService {
             throw new BadRequestException("The user with email: " + body.email() + ", already exist.");
         });
 
-        String password = body.password() != null && !body.password().isEmpty() ? body.password() : userPassword;
-
-        User user = new User(body.name(), body.surname(), body.username(), body.email(), bCrypt.encode(password));
+        User user = new User(body.name(), body.surname(), body.email(), bCrypt.encode(body.password()));
 
         return userRepository.save(user);
     }

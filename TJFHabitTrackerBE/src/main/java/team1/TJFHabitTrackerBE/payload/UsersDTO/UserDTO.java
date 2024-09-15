@@ -12,9 +12,6 @@ public record UserDTO(
     @NotEmpty(message = "Surname field is required")
     @Size(min = 2, max = 16, message = "The surname must be between 2 and 16 characters")
     String surname,
-    @NotEmpty(message = "Username field is required")
-    @Size(min = 6, max = 12, message = "The username must be between 6 and 12 characters")
-    String username,
     @NotEmpty(message = "Email field is required")
     @Email
     String email,
