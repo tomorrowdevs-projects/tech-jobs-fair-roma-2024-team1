@@ -81,15 +81,22 @@
   line-height: 14.24px;
 }
 
+.footerWrapper {
+  margin-top: 20px;
+  text-align: center;
+}
+
 .footerText {
   font-weight: 500;
   line-height: 15.13px;
   font-size: 14px;
-  margin-top: 20px;
-  text-align: center;
+  text-transform: uppercase;
 }
 
 .footerText span a {
   text-decoration: none;
   color: #8e97fd;
+}
+.fadeOut {
+  opacity: 0;
 }

@@ -1,16 +1,24 @@
 import { SignIn, useAuth } from "@clerk/clerk-react";
-import { Navigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import styles from "./SignInPage.module.css";
+import { useState } from "react";
 
 const SignInPage = () => {
   const { isSignedIn } = useAuth();
-
+  const [animate, setAnimate] = useState(false);
+  const navigate = useNavigate();
   if (isSignedIn) {
     return <Navigate to="/" replace />;
   }
+  const handleClick = () => {
+    setAnimate(true);
+    setTimeout(() => {
+      navigate("/signUp");
+    }, 300);
+  };
 
   return (
-    <div className={styles.signInPage}>
+    <div className={`${styles.signInPage} ${animate ? styles.fadeOut : ""}`}>
       <div className={styles.contentWrapper}>
         <SignIn
           appearance={{
@@ -27,7 +35,7 @@ const SignInPage = () => {
               formFieldInput: styles.formFieldInput,
               formButtonPrimary: styles.formButtonPrimary,
               buttonArrowIcon: styles.dNone,
-              formFieldLabelRow: styles.dNone,
+
               footer: styles.dNone,
             },
             variables: {
@@ -38,6 +46,14 @@ const SignInPage = () => {
           }}
           redirectUrl="/"
         />
+        <div className={styles.footerWrapper}>
+          <p className={styles.footerText}>
+            You don't have an account yet?{" "}
+            <span>
+              <Link onClick={handleClick}>SIGN UP</Link>
+            </span>
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -37,7 +37,7 @@ const SignUpPage = () => {
               formFieldInput: styles.formFieldInput,
               formButtonPrimary: styles.formButtonPrimary,
               buttonArrowIcon: styles.dNone,
-              formFieldLabelRow: styles.dNone,
+
               footer: styles.dNone,
             },
             variables: {
@@ -48,6 +48,7 @@ const SignUpPage = () => {
           }}
           redirectUrl="/"
         />
+
         <div className={styles.footerWrapper}>
           <p className={styles.footerText}>
             ALREADY HAVE AN ACCOUNT?{" "}
