@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { SignedIn, SignedOut, RedirectToSignIn, useAuth } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
+import PropTypes from 'prop-types';
 import HabitPage from "./pages/HabitPage";
 import SignUpPage from "./pages/Registration/SignUpPage";
 import SignInPage from "./pages/SignIn/SignInPage";
@@ -12,11 +13,15 @@ function ProtectedRoute({ children }) {
   }
 
   if (!isSignedIn) {
-    return <Navigate to="/signIn" replace />;
+    return <Navigate to="/signUp" replace />;
   }
 
   return children;
 }
+
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+};
 
 function App() {
   return (
