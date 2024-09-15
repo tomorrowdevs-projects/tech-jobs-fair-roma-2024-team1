@@ -10,16 +10,20 @@ const MyNav = () => {
           <Navbar.Toggle />
           <Navbar.Collapse className="justify-content-end">
             <Navbar.Text>
-              <Dropdown autoClose="inside">
-                <Dropdown.Toggle variant="btn" id="dropdown-autoclose-inside" className={styles.noCaret}>
-                  {isSignedIn && <img src={user.imageUrl} alt="" className={`${styles.imgProfile} rounded rounded-circle `} />}
-                  {isSignedIn && <p className={`${styles.navText} py-3 m-0 `}>Hello, {user.firstName}</p>}
+              <Dropdown autoClose="outside">
+                <Dropdown.Toggle variant="btn" id="dropdown-autoclose-outside" className={`${styles.noCaret} ${styles.userToggle}`}>
+                {isSignedIn && (
+                  <div className={styles.userInfo}>
+                    <img src={user.imageUrl} alt="" className={`${styles.imgProfile} rounded-circle`} />
+                    <div className={`${styles.navText} mt-3`}>Hello, {user.firstName}</div>
+                  </div>
+                )}
                 </Dropdown.Toggle>
-                <Dropdown.Menu className={`${styles.navBar} `}>
+                <Dropdown.Menu className={`${styles.navBar} ${styles.narrowDropdown}`}>
                   <Dropdown.Item className={`${styles.navBar}`}>
                     {" "}
                     <SignOutButton>
-                      <p className={`${styles.navText} py-3 m-0 `}>Sign out</p>
+                      <span className={`${styles.navText} py-3 m-0 `}>Sign out</span>
                     </SignOutButton>
                   </Dropdown.Item>
                 </Dropdown.Menu>
