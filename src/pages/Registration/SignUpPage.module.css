@@ -1,3 +1,24 @@
+.brandWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.logo {
+  height: 60px;
+  width: 60px;
+  margin-right: 10px;
+}
+
+.appName {
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: white;
+  text-align: center;
+}
+
 .signUpPage {
   background-color: #5251b5;
   color: white;
