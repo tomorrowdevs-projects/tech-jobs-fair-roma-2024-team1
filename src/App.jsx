@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import PropTypes from "prop-types";
 import HabitPage from "./pages/HabitPage";
+import HabitChartPage from "./pages/HabitChartPage"; 
 import SignUpPage from "./pages/Registration/SignUpPage";
 import SignInPage from "./pages/SignIn/SignInPage";
 import MyNav from "./component/MyNav";
@@ -38,6 +39,14 @@ function App() {
           element={
             <ProtectedRoute>
               <HabitPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/habit-chart"
+          element={
+            <ProtectedRoute>
+              <HabitChartPage />
             </ProtectedRoute>
           }
         />
