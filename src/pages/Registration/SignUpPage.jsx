@@ -53,7 +53,7 @@ const SignUpPage = () => {
               colorBackground: "#5251b5",
             },
           }}
-          redirectUrl="/"
+          forceRedirectUrl="/"
         />
 
         <div className={styles.footerWrapper}>
