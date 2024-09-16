@@ -65,7 +65,6 @@
   background-color: #8E97FD;
   font-size: 1.25rem;
   font-weight: 600;
-  transition: all 0.3s ease;
 }
 
 .modalHeader {
@@ -206,4 +205,27 @@
 
 .form-check-input:hover {
   background-color: #7a84e8;
+}
+
+.habitName {
+  flex: 1;
+  margin-right: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.deleteButton {
+  background-color: transparent;
+  border: none;
+  color: #ff6b6b;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 5px;
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+.deleteButton:hover {
+  color: #ff4757;
 }
