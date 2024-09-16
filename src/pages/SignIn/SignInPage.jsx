@@ -2,6 +2,7 @@ import { SignIn, useAuth } from "@clerk/clerk-react";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import styles from "./SignInPage.module.css";
 import { useState } from "react";
+import logo from "../../assets/logo.svg";
 
 const SignInPage = () => {
   const { isSignedIn } = useAuth();
@@ -10,6 +11,7 @@ const SignInPage = () => {
   if (isSignedIn) {
     return <Navigate to="/" replace />;
   }
+
   const handleClick = () => {
     setAnimate(true);
     setTimeout(() => {
@@ -20,6 +22,12 @@ const SignInPage = () => {
   return (
     <div className={`${styles.signInPage} ${animate ? styles.fadeOut : ""}`}>
       <div className={styles.contentWrapper}>
+
+        <div className={styles.brandWrapper}>
+          <img src={logo} alt="RitmoGiornaliero Logo" className={styles.logo} />
+          <span className={styles.appName}>RitmoGiornaliero</span>
+        </div>
+
         <SignIn
           appearance={{
             elements: {
@@ -35,7 +43,6 @@ const SignInPage = () => {
               formFieldInput: styles.formFieldInput,
               formButtonPrimary: styles.formButtonPrimary,
               buttonArrowIcon: styles.dNone,
-
               footer: styles.dNone,
             },
             variables: {
@@ -46,6 +53,7 @@ const SignInPage = () => {
           }}
           redirectUrl="/"
         />
+
         <div className={styles.footerWrapper}>
           <p className={styles.footerText}>
             You don't have an account yet?{" "}
