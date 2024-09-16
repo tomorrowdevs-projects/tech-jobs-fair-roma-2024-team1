@@ -1,12 +1,12 @@
 .habitPage {
-  background-color: #5251B5;
+  background-color: #5251b5;
   color: white;
-  font-family: 'Rubik', sans-serif;
+  font-family: "Rubik", sans-serif;
 }
 
 .pageTitle {
   font-weight: 700;
-  color: #FFFFFF;
+  color: #ffffff;
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
@@ -14,7 +14,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background-color: #8E97FD;
+  background-color: #8e97fd;
   color: white;
   border: none;
   display: flex;
@@ -26,7 +26,7 @@
 }
 
 .btnCircle:hover {
-  background-color: #7A84E8;
+  background-color: #7a84e8;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25), 0 4px 8px rgba(0, 0, 0, 0.22);
 }
@@ -54,7 +54,7 @@
 }
 
 .today {
-  background-color: #8E97FD;
+  background-color: #8e97fd;
 }
 
 .bigCircle {
@@ -62,17 +62,17 @@
   height: 300px;
   margin-top: 100px;
   border-radius: 50%;
-  background-color: #8E97FD;
+  background-color: #8e97fd;
   font-size: 1.25rem;
   font-weight: 600;
 }
 
 .modalHeader {
-  background-color: #7A84E8;
+  background-color: #7a84e8;
 }
 
 .modalBody {
-  background-color: #5251B5;
+  background-color: #5251b5;
   color: white;
 }
 
@@ -113,11 +113,17 @@
 }
 
 .completed {
-  background-color: #8E97FD;
+  background-color: #8e97fd;
 }
 
 .notCompleted {
   background-color: transparent;
+}
+.headerModal {
+  color: #ffffff !important;
+
+  font-size: 24px !important;
+  line-height: 28.44px !important;
 }
 
 @media (max-width: 767px) {
@@ -187,7 +193,8 @@
   transition: background-color 0.2s ease;
 }
 
-.customSelect:hover, .customSelect:focus {
+.customSelect:hover,
+.customSelect:focus {
   background-color: #7a84e8;
 }
 
@@ -228,4 +235,16 @@
 
 .deleteButton:hover {
   color: #ff4757;
+}
+.inputField {
+  background-color: #8e97fd !important;
+  border: 1px solid #dee2e600 !important;
+}
+
+.saveButton {
+  background-color: #7889df !important;
+  text-transform: uppercase;
+  font-size: 18.43px !important;
+  line-height: 21.84px !important;
+  border: 1px solid #dee2e600 !important;
 }

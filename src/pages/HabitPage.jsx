@@ -1,19 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Modal, Button, Form } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
-import styles from './HabitPage.module.css';
+import React, { useState, useEffect, useRef } from "react";
+import { Modal, Button, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
+import styles from "./HabitPage.module.css";
 
 const HabitPage = () => {
   const [dates, setDates] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [reminder, setReminder] = useState(false);
   const [habits, setHabits] = useState([]);
-  const [newHabitName, setNewHabitName] = useState('');
+  const [newHabitName, setNewHabitName] = useState("");
 
   const navigate = useNavigate();
 
   const getCalendarDates = () => {
-    const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dateArray = [];
     const today = new Date();
 
@@ -23,7 +23,7 @@ const HabitPage = () => {
       dateArray.push({
         day: days[date.getDay()],
         date: date.getDate(),
-        isToday: i === 0
+        isToday: i === 0,
       });
     }
     setDates(dateArray);
@@ -31,32 +31,32 @@ const HabitPage = () => {
 
   useEffect(() => {
     getCalendarDates();
-    const storedHabits = JSON.parse(localStorage.getItem('habits')) || [];
+    const storedHabits = JSON.parse(localStorage.getItem("habits")) || [];
     setHabits(storedHabits);
   }, []);
 
   const handleModalToggle = () => setShowModal(!showModal);
 
   const handleSaveHabit = () => {
-    if (newHabitName.trim() !== '') {
-      const frequency = document.getElementById('habitFrequency').value; 
+    if (newHabitName.trim() !== "") {
+      const frequency = document.getElementById("habitFrequency").value;
       const newHabit = {
         name: newHabitName,
         completions: Array(5).fill(false),
-        frequency: frequency, 
-        reminder: reminder 
+        frequency: frequency,
+        reminder: reminder,
       };
       const updatedHabits = [...habits, newHabit];
       setHabits(updatedHabits);
-      localStorage.setItem('habits', JSON.stringify(updatedHabits));
-      setNewHabitName('');
-      setReminder(false); 
+      localStorage.setItem("habits", JSON.stringify(updatedHabits));
+      setNewHabitName("");
+      setReminder(false);
       handleModalToggle();
     }
   };
 
   const toggleHabitCompletion = (habitIndex, dateIndex) => {
-    setHabits(prevHabits => {
+    setHabits((prevHabits) => {
       const updatedHabits = prevHabits.map((habit, index) => {
         if (index === habitIndex) {
           const newCompletions = [...habit.completions];
@@ -65,19 +65,19 @@ const HabitPage = () => {
         }
         return habit;
       });
-      localStorage.setItem('habits', JSON.stringify(updatedHabits));
+      localStorage.setItem("habits", JSON.stringify(updatedHabits));
       return updatedHabits;
     });
   };
 
   const handleChartNavigation = () => {
-    navigate('/habit-chart', { state: { habits: habits } });
+    navigate("/habit-chart", { state: { habits: habits } });
   };
 
   const handleDeleteHabit = (habitIndex) => {
     const updatedHabits = habits.filter((_, index) => index !== habitIndex);
     setHabits(updatedHabits);
-    localStorage.setItem('habits', JSON.stringify(updatedHabits));
+    localStorage.setItem("habits", JSON.stringify(updatedHabits));
   };
 
   return (
@@ -92,8 +92,12 @@ const HabitPage = () => {
         <h1 className={`${styles.pageTitle} text-center mb-4`}>Set your goals</h1>
 
         <div className="d-flex justify-content-end mb-3">
-          <button onClick={handleModalToggle} className={`${styles.btnCircle} me-4`}>+</button>
-          <button onClick={handleChartNavigation} className={`${styles.btnCircle} me-4`}>〽</button>
+          <button onClick={handleModalToggle} className={`${styles.btnCircle} me-4`}>
+            +
+          </button>
+          <button onClick={handleChartNavigation} className={`${styles.btnCircle} me-4`}>
+            〽
+          </button>
         </div>
 
         <div className="row">
@@ -101,7 +105,7 @@ const HabitPage = () => {
             <h2>Your habits</h2>
             <div className={`${styles.calendarStrip} d-flex justify-content-between mb-4 mt-4 p-2 rounded`}>
               {dates.map((item, index) => (
-                <div key={index} className={`${styles.calendarDay} text-center p-1 rounded ${item.isToday ? styles.today : ''}`}>
+                <div key={index} className={`${styles.calendarDay} text-center p-1 rounded ${item.isToday ? styles.today : ""}`}>
                   <div className={styles.dateNumber}>{item.date}</div>
                   <div className={styles.dayName}>{item.day}</div>
                 </div>
@@ -114,11 +118,7 @@ const HabitPage = () => {
           <div key={habitIndex} className={`${styles.habitRow} d-flex align-items-center mb-3`}>
             <div className={`${styles.habitName} d-flex align-items-center`}>
               {habit.name}
-              <button
-                className={`${styles.deleteButton} ms-2`}
-                onClick={() => handleDeleteHabit(habitIndex)}
-                aria-label="Delete habit"
-              >
+              <button className={`${styles.deleteButton} ms-2`} onClick={() => handleDeleteHabit(habitIndex)} aria-label="Delete habit">
                 ×
               </button>
             </div>
@@ -129,7 +129,7 @@ const HabitPage = () => {
                   className={`${styles.completionButton} ${completed ? styles.completed : styles.notCompleted}`}
                   onClick={() => toggleHabitCompletion(habitIndex, dateIndex)}
                 >
-                  {completed ? '✔' : '×'}
+                  {completed ? "✔" : "×"}
                 </button>
               ))}
             </div>
@@ -138,20 +138,20 @@ const HabitPage = () => {
 
         {habits.length === 0 && (
           <div className="flex-grow-1 d-flex align-items-center justify-content-center">
-            <div className={`${styles.bigCircle} d-flex align-items-center justify-content-center text-center mt-4 p-3`}>
-              You have no active habits
-            </div>
+            <div className={`${styles.bigCircle} d-flex align-items-center justify-content-center text-center mt-4 p-3`}>You have no active habits</div>
           </div>
         )}
 
         <Modal show={showModal} onHide={handleModalToggle} centered>
-          <Modal.Header closeButton className={`${styles.modalHeader}`}>
-            <Modal.Title>Create Habit</Modal.Title>
+          <Modal.Header className={`${styles.modalHeader} border-0 justify-content-center`}>
+            <Modal.Title className={`${styles.headerModal}`}>Create Habit</Modal.Title>
           </Modal.Header>
           <Modal.Body className={`${styles.modalBody}`}>
             <Form>
               <Form.Group controlId="habitName">
-                <Form.Label htmlFor="habitName" className="text-white">Name</Form.Label>
+                <Form.Label htmlFor="habitName" className="text-white">
+                  Name
+                </Form.Label>
                 <Form.Control
                   id="habitName"
                   type="text"
@@ -163,7 +163,9 @@ const HabitPage = () => {
               </Form.Group>
 
               <Form.Group controlId="habitFrequency" className="mt-3">
-                <Form.Label htmlFor="habitFrequency" className="text-white">Frequency</Form.Label>
+                <Form.Label htmlFor="habitFrequency" className="text-white">
+                  Frequency
+                </Form.Label>
                 <Form.Select id="habitFrequency" className={styles.inputField}>
                   <option value="everyday">Everyday</option>
                   <option value="every3days">Every 3 Days</option>
@@ -172,14 +174,10 @@ const HabitPage = () => {
               </Form.Group>
 
               <Form.Group controlId="habitReminder" className="mt-3 d-flex align-items-center justify-content-between">
-                <Form.Label htmlFor="habitReminder" className="text-white mb-0">Reminder</Form.Label>
-                <Form.Check
-                  type="switch"
-                  id="habitReminder"
-                  className={styles.switch}
-                  checked={reminder}
-                  onChange={() => setReminder(!reminder)}
-                />
+                <Form.Label htmlFor="habitReminder" className="text-white mb-0">
+                  Reminder
+                </Form.Label>
+                <Form.Check type="switch" id="habitReminder" className={styles.switch} checked={reminder} onChange={() => setReminder(!reminder)} />
               </Form.Group>
 
               <Button variant="outline-light" className={`${styles.saveButton} mt-4 w-100`} onClick={handleSaveHabit}>
