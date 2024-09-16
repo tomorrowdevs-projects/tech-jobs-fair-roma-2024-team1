@@ -24,7 +24,7 @@ if (!PUBLISHABLE_KEY) {
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <ClerkProvider localization={localization} publishableKey={PUBLISHABLE_KEY}>
+    <ClerkProvider localization={localization} publishableKey={PUBLISHABLE_KEY} >
       <BrowserRouter>
         <App />
       </BrowserRouter>
