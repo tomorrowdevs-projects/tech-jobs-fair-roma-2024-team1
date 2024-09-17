@@ -1,10 +1,19 @@
-import { SignOutButton, useUser } from "@clerk/clerk-react";
+import { SignOutButton, useUser, useClerk } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 import { Container, Dropdown, Navbar } from "react-bootstrap";
 import styles from "../component/MyNav.module.css";
 import logo from "../assets/logo.svg";
 
 const MyNav = () => {
   const { isSignedIn, user } = useUser();
+  const { signOut } = useClerk();
+  const navigate = useNavigate();
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate("/signIn", { replace: true });
+  };
+
   return (
     <>
       <Navbar className={`${styles.navBar} py-0`}>
@@ -28,7 +37,7 @@ const MyNav = () => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu className={`${styles.navBar} ${styles.narrowDropdown}`}>
                   <Dropdown.Item className={`${styles.navBar}`}>
-                    <SignOutButton>
+                    <SignOutButton signOutCallback={handleSignOut}>
                       <span className={`${styles.navText} py-3 m-0`}>Sign out</span>
                     </SignOutButton>
                   </Dropdown.Item>

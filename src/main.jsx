@@ -1,4 +1,4 @@
-import { StrictMode } from "react";
+import React from "react";
 import { createRoot } from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { BrowserRouter } from "react-router-dom";
@@ -23,11 +23,11 @@ if (!PUBLISHABLE_KEY) {
 }
 
 createRoot(document.getElementById("root")).render(
-  <StrictMode>
+  <React.StrictMode>
     <ClerkProvider localization={localization} publishableKey={PUBLISHABLE_KEY} >
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </ClerkProvider>
-  </StrictMode>
+  </React.StrictMode>
 );
