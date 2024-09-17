@@ -17,6 +17,7 @@ public record HabitsDTO(
         @NotNull(message = "The field created at is required")
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
-        UUID user
+        boolean completed,
+        String user
 ) {
 }

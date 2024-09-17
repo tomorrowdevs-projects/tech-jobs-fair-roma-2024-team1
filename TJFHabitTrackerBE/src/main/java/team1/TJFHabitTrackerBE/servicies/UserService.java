@@ -42,11 +42,11 @@ public class UserService {
     }
 
 
-    public User findById(UUID id) {
+    public User findById(String id) {
         return this.userRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
     }
 
-    public void findUserByIdAndDelete(UUID id) {
+    public void findUserByIdAndDelete(String id) {
         User found = this.findById(id);
         this.userRepository.delete(found);
     }
@@ -58,12 +58,7 @@ public class UserService {
     }
 
 
-    public User changeEmail(UUID id, UserDTO body) {
-        User found = this.findById(id);
-        found.setEmail(body.email());
-        System.out.println(body.email());
-        return userRepository.save(found);
-    }
+
 
 
     }

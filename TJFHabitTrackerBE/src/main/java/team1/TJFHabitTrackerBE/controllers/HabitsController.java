@@ -11,7 +11,9 @@ import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsResponseDTO;
 import team1.TJFHabitTrackerBE.servicies.HabitsService;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/habits")
@@ -29,6 +31,13 @@ public class HabitsController {
         return this.habitsService.getAllHabits(page, size, sortBy);
     }
 
+    @GetMapping("/completed")
+    public Page<Habits> getHabitsCompleted(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
+                                  @RequestParam(defaultValue = "id") String sortBy) {
+
+        return this.habitsService.getAllHabitsCompleted(page, size, sortBy);
+    }
+
     @PostMapping
     public HabitsResponseDTO saveHabits(@RequestBody @Validated HabitsDTO body, BindingResult validationResult){
         if (validationResult.hasErrors()) {
@@ -44,4 +53,28 @@ public class HabitsController {
     public void deleteHabits(@PathVariable UUID habitsId) {
         habitsService.findHabitsByIdAndDelete(habitsId);
     }
+
+
+    @PatchMapping("/{habitsId}")
+    public Habits modifyComplete(@PathVariable UUID habitsId, @RequestBody HabitsDTO body) {
+        return this.habitsService.modifyCompleted(habitsId, body);
+
+    }
+
+    @PostMapping("/frequencies")
+    public List<HabitsResponseDTO> saveHabitsByFrequency(@RequestBody @Validated HabitsDTO body, BindingResult validationResult) {
+        if (validationResult.hasErrors()) {
+            System.out.println(validationResult.getAllErrors());
+            throw new BadRequestException(validationResult.getAllErrors());
+        }
+        System.out.println(body);
+        List<Habits> savedHabits = this.habitsService.saveHabitsByFrequency(body);
+        return savedHabits.stream()
+                .map(habit -> new HabitsResponseDTO(habit.getId()))
+                .collect(Collectors.toList());
+    }
+
+
+
+
 }

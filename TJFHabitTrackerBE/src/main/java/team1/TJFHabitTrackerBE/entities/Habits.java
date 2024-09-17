@@ -29,17 +29,19 @@ public class Habits {
     private LocalDateTime createdAt;
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    private boolean completed;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
 
-    public Habits(String name, Frequency frequency, boolean reminder, LocalDateTime createdAt, LocalDateTime updatedAt, User user) {
+    public Habits(String name, Frequency frequency, boolean reminder, LocalDateTime createdAt, LocalDateTime updatedAt, boolean completed, User user) {
         this.name = name;
         this.frequency = frequency;
         this.reminder = reminder;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+        this.completed = completed;
         this.user = user;
     }
 }

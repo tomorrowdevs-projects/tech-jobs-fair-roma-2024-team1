@@ -30,4 +30,12 @@ public class Notifications {
     private LocalDateTime scheduledAt;
     @Column(name = "sent_at")
     private LocalDateTime sent_at;
+
+    public Notifications(User user, Habits habits, String message, LocalDateTime scheduledAt, LocalDateTime sent_at) {
+        this.user = user;
+        this.habits = habits;
+        this.message = message;
+        this.scheduledAt = scheduledAt;
+        this.sent_at = sent_at;
+    }
 }
