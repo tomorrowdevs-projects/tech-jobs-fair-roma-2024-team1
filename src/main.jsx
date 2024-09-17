@@ -1,4 +1,4 @@
-import React from "react";
+import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { BrowserRouter } from "react-router-dom";
@@ -9,19 +9,12 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 const localization = {
+  dividerText: "OR LOG IN WITH EMAIL",
+  formButtonPrimary: "Get started",
   signIn: {
     start: {
-      title: "Sign in to your account",
-      subtitle: "Welcome back! Please enter your details.",
+      title: "Welcome",
     },
-    formButtonPrimary: "Sign in",
-  },
-  signUp: {
-    start: {
-      title: "Create an account",
-      subtitle: "Get started with our app",
-    },
-    formButtonPrimary: "Sign up",
   },
 };
 
@@ -30,11 +23,11 @@ if (!PUBLISHABLE_KEY) {
 }
 
 createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <ClerkProvider localization={localization} publishableKey={PUBLISHABLE_KEY} >
+  <StrictMode>
+    <ClerkProvider localization={localization} publishableKey={PUBLISHABLE_KEY}>
       <BrowserRouter>
         <App />
       </BrowserRouter>
     </ClerkProvider>
-  </React.StrictMode>
+  </StrictMode>
 );
