@@ -8,6 +8,7 @@ const SignInPage = () => {
   const { isSignedIn } = useAuth();
   const [animate, setAnimate] = useState(false);
   const navigate = useNavigate();
+
   if (isSignedIn) {
     return <Navigate to="/" replace />;
   }
@@ -22,7 +23,7 @@ const SignInPage = () => {
   return (
     <div className={`${styles.signInPage} ${animate ? styles.fadeOut : ""}`}>
       <div className={styles.contentWrapper}>
-
+        
         <div className={styles.brandWrapper}>
           <img src={logo} alt="RitmoGiornaliero Logo" className={styles.logo} />
           <span className={styles.appName}>RitmoGiornaliero</span>
@@ -51,12 +52,12 @@ const SignInPage = () => {
               colorBackground: "#5251b5",
             },
           }}
-          redirectUrl="/"
+          forceRedirectUrl="/"
         />
 
         <div className={styles.footerWrapper}>
           <p className={styles.footerText}>
-            You don't have an account yet?{" "}
+            You don&#39;t have an account yet?{" "}
             <span>
               <Link onClick={handleClick}>SIGN UP</Link>
             </span>
