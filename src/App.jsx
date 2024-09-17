@@ -30,12 +30,12 @@ function App() {
           }
         />
         <Route 
-          path="/signUp" 
-          element={isSignedIn ? <Navigate to="/" replace /> : <SignUpPage />} 
-        />
-        <Route 
           path="/signIn" 
           element={isSignedIn ? <Navigate to="/" replace /> : <SignInPage />} 
+        />
+        <Route 
+          path="/signUp" 
+          element={isSignedIn ? <Navigate to="/" replace /> : <SignUpPage />} 
         />
         <Route path="*" element={<Navigate to={isSignedIn ? "/" : "/signIn"} replace />} />
       </Routes>
