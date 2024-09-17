@@ -9,12 +9,19 @@ import "bootstrap/dist/css/bootstrap.min.css";
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 
 const localization = {
-  dividerText: "OR LOG IN WITH EMAIL",
-  formButtonPrimary: "Get started",
   signIn: {
     start: {
-      title: "Welcome",
+      title: "Sign in to your account",
+      subtitle: "Welcome back! Please enter your details.",
     },
+    formButtonPrimary: "Sign in",
+  },
+  signUp: {
+    start: {
+      title: "Create an account",
+      subtitle: "Get started with our app",
+    },
+    formButtonPrimary: "Sign up",
   },
 };
 
