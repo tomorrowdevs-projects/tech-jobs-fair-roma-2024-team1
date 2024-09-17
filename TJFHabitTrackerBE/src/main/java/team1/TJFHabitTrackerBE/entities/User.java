@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,12 +27,12 @@ public class User  {
     private String id;
     private String email;
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Date createdAt;
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
 
-    public User(String id, String email, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public User(String id, String email, Date createdAt, Date updatedAt) {
         this.id = id;
         this.email = email;
         this.createdAt = createdAt;

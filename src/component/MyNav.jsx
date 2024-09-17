@@ -2,9 +2,44 @@ import { SignOutButton, useUser } from "@clerk/clerk-react";
 import { Container, Dropdown, Navbar } from "react-bootstrap";
 import styles from "../component/MyNav.module.css";
 import logo from "../assets/logo.svg";
+import { useEffect, useState } from "react";
 
 const MyNav = () => {
   const { isSignedIn, user } = useUser();
+  const [userData, setUserData] = useState(null);
+  useEffect(() => {
+    if (user) {
+      const userData = {
+        id: user.id,
+        email: user.emailAddresses[0].emailAddress,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+      setUserData(userData);
+    }
+  }, [user]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch("http://localhost:3001/auth/register", {
+          method: "POST",
+          body: JSON.stringify(userData),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        console.log("Aggiunto con successo al db", data);
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+    console.log(userData);
+    fetchUsers();
+  }, [userData]);
   return (
     <>
       <Navbar className={`${styles.navBar} py-0`}>

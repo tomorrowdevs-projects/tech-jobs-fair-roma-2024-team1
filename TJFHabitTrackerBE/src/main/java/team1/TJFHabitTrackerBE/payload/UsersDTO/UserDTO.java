@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 
 public record UserDTO(
@@ -14,7 +15,7 @@ public record UserDTO(
    @NotEmpty(message = "The field email is required")
    String email,
    @NotNull(message = "The field created at is required")
-   LocalDateTime createdAt,
-   LocalDateTime updatedAt
+   Date createdAt,
+   Date updatedAt
 ) {
 }
