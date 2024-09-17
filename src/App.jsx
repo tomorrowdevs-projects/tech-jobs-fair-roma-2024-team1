@@ -15,7 +15,7 @@ function ProtectedRoute({ children }) {
   }
 
   if (!isSignedIn) {
-    return <Navigate to="/signUp" replace />;
+    return <Navigate to="/signIn" replace />;
   }
 
   return (
@@ -50,8 +50,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/signUp" element={<SignUpPage />} />
         <Route path="/signIn" element={<SignInPage />} />
+        <Route path="/signUp" element={<SignUpPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
