@@ -7,24 +7,16 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
 import team1.TJFHabitTrackerBE.payload.UsersDTO.UserDTO;
-import team1.TJFHabitTrackerBE.payload.UsersDTO.UserLoginDTO;
-import team1.TJFHabitTrackerBE.payload.UsersDTO.UserLoginResponseDTO;
 import team1.TJFHabitTrackerBE.payload.UsersDTO.UserResponseDTO;
-import team1.TJFHabitTrackerBE.servicies.AuthService;
 import team1.TJFHabitTrackerBE.servicies.UserService;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-    @Autowired
-    private AuthService authService;
+
     @Autowired
     private UserService userService;
 
-    @PostMapping("/login")
-    public UserLoginResponseDTO login(@RequestBody UserLoginDTO payload) {
-        return new UserLoginResponseDTO(authService.authenticateUtenteAndGenerateToken(payload));
-    }
 
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)

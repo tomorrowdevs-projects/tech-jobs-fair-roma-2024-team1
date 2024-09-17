@@ -2,12 +2,10 @@ package team1.TJFHabitTrackerBE.servicies;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import team1.TJFHabitTrackerBE.entities.User;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
@@ -22,8 +20,7 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private PasswordEncoder bCrypt;
+
 
 
 
@@ -39,7 +36,7 @@ public class UserService {
             throw new BadRequestException("The user with email: " + body.email() + ", already exist.");
         });
 
-        User user = new User(body.name(), body.surname(), body.email(), bCrypt.encode(body.password()));
+        User user = new User(body.id(), body.email(), body.createdAt(), body.updatedAt());
 
         return userRepository.save(user);
     }
@@ -60,12 +57,6 @@ public class UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new NotFoundException("The user with email: " + email + ", already exist."));
     }
 
-    public User changePassword(UUID id, UserDTO body) {
-        User found = this.findById(id);
-        found.setPassword(bCrypt.encode(body.password()));
-
-        return userRepository.save(found);
-    }
 
     public User changeEmail(UUID id, UserDTO body) {
         User found = this.findById(id);

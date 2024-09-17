@@ -33,10 +33,6 @@ public class SecurityConfig {
         return httpSecurity.build();
     }
 
-    @Bean
-    PasswordEncoder getBCrypt() {
-        return new BCryptPasswordEncoder(11);
-    }
 
     @Bean
     CorsConfigurationSource corsConfigurationSource() {

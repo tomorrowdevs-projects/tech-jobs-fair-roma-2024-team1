@@ -33,7 +33,7 @@ public class HabitsService {
 
     public Habits saveHabits(HabitsDTO body) {
         User found = this.userService.findById(body.user());
-        Habits habit = new Habits(body.name(), convertStringToFrequency(body.frequency()), body.reminder(), found);
+        Habits habit = new Habits(body.name(), convertStringToFrequency(body.frequency()), body.reminder(), body.createdAt(), body.updatedAt(), found);
 
         return habitsRepository.save(habit);
     }
