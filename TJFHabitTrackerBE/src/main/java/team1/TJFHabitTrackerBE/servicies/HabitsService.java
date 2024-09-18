@@ -13,11 +13,13 @@ import team1.TJFHabitTrackerBE.entities.User;
 import team1.TJFHabitTrackerBE.enums.Frequency;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
 import team1.TJFHabitTrackerBE.exceptions.NotFoundException;
+import team1.TJFHabitTrackerBE.payload.HabitsDTO.CompleteHabits;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsDTO;
 import team1.TJFHabitTrackerBE.repositories.HabitsRepository;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,11 +61,11 @@ public class HabitsService {
         return this.habitsRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
     }
 
-    public void findHabitsByIdAndDelete(UUID id) {
+
+    public void deleteHabits(UUID id) {
         Habits found = this.findById(id);
         this.habitsRepository.delete(found);
     }
-
 
 //    METODO DI CONVERSIONE DA STRINGA A ENUM (FREQUENCY)
     private static Frequency convertStringToFrequency (String resType){
@@ -77,11 +79,11 @@ public class HabitsService {
         }
     }
 
-    public Habits modifyCompleted(UUID id, HabitsDTO payload) {
+    public Habits modifyCompleted(UUID id, CompleteHabits payload) {
         Habits found = this.findById(id);
 
         found.setCompleted(payload.completed());
-        found.setUpdatedAt(payload.updatedAt());
+        found.setUpdatedAt(LocalDateTime.now());
 
         return habitsRepository.save(found);
     }

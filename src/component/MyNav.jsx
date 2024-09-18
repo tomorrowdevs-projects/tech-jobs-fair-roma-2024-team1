@@ -25,29 +25,30 @@ const MyNav = () => {
     }
   }, [user]);
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch("http://localhost:3001/auth/saveUser", {
-          method: "POST",
-          body: JSON.stringify(userData),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        localStorage.setItem("authToken", data.tokenHabits);
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
+    if (userData) {
+      const fetchUsers = async () => {
+        try {
+          const response = await fetch("http://localhost:3001/auth/saveUser", {
+            method: "POST",
+            body: JSON.stringify(userData),
+            headers: {
+              "Content-Type": "application/json",
+            },
+          });
+          const data = await response.json();
+          localStorage.setItem("authToken", data.tokenHabits);
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          console.log("Aggiunto con successo al db", data);
+        } catch (error) {
+          console.error("Error fetching users:", error);
         }
-        console.log("Aggiunto con successo al db", data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-    console.log(userData);
-    fetchUsers();
+      };
+      console.log(userData);
+      fetchUsers();
+    }
   }, [userData]);
-
   return (
     <>
       <Navbar className={`${styles.navBar} py-0`}>

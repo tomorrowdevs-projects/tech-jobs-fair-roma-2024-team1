@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import team1.TJFHabitTrackerBE.entities.Habits;
 import team1.TJFHabitTrackerBE.entities.User;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
+import team1.TJFHabitTrackerBE.exceptions.UnauthorizedException;
+import team1.TJFHabitTrackerBE.payload.HabitsDTO.CompleteHabits;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsResponseDTO;
 import team1.TJFHabitTrackerBE.servicies.HabitsService;
@@ -56,14 +58,27 @@ public class HabitsController {
     }
 
     @DeleteMapping("/{habitsId}")
-    public void deleteHabits(@PathVariable UUID habitsId) {
-        habitsService.findHabitsByIdAndDelete(habitsId);
+    public void deleteHabits(@PathVariable UUID habitsId, @AuthenticationPrincipal User user) {
+        Habits habit = habitsService.findById(habitsId);
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedException("You are not authorized to delete this habit.");
+        }
+
+        habitsService.deleteHabits(habitsId);
+
     }
 
 
     @PatchMapping("/{habitsId}")
-    public Habits modifyComplete(@PathVariable UUID habitsId, @RequestBody HabitsDTO body) {
-        return this.habitsService.modifyCompleted(habitsId, body);
+    public Habits modifyComplete(@PathVariable UUID habitsId, @RequestBody CompleteHabits body, @AuthenticationPrincipal User user) {
+        Habits habit = habitsService.findById(habitsId);
+
+
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedException("You are not authorized to modify this habit.");
+        }
+
+        return habitsService.modifyCompleted(habitsId, body);
 
     }
 
