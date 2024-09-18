@@ -67,7 +67,7 @@ For more detailed information on the project's architecture, data model, and spe
 
 ## License
 
-This project is released under the GPLv3 license. The GPLv3 is a copyleft license that guarantees the freedom to run, study, share, and modify the software. This means that anyone can use, modify, and distribute this software, as long as they respect the same freedoms for others. For more details, please consult the [license](LICENSE.md).
+This project is released under the **GPLv3** license. The GPLv3 is a copyleft license that guarantees the freedom to run, study, share, and modify the software. This means that anyone can use, modify, and distribute this software, as long as they respect the same freedoms for others. For more details, please consult the [license](LICENSE.md).
 
 This README provides a high-level overview of the Habit Tracker project. For more detailed technical specifications and development guidelines, please consult our project wiki.
 

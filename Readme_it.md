@@ -60,4 +60,4 @@ Per informazioni più dettagliate sull'architettura del progetto, sul modello di
 
 Questo progetto è rilasciato sotto la licenza **GPLv3**. La GPLv3 è una licenza copyleft che garantisce la libertà di eseguire, studiare, condividere e modificare il software. Ciò significa che chiunque può utilizzare, modificare e distribuire questo software, a condizione di rispettare le stesse libertà per gli altri. Per maggiori dettagli, consultare la [licenza](LICENSE.md).
 
-Questo README fornisce una panoramica generale del progetto RitmoGiornaliero. Per specifiche tecniche più dettagliate e linee guida di sviluppo, consulta la nostra wiki del progetto.
+Questo README fornisce una panoramica generale del progetto RitmoGiornaliero. Per specifiche tecniche più dettagliate e linee guida di sviluppo, consulta la nostra [wiki](https://github.com/tomorrowdevs-projects/tech-jobs-fair-roma-2024-team1/wiki) del progetto.
