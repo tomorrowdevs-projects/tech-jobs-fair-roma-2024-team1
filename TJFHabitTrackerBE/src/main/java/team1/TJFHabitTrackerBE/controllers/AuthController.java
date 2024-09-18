@@ -18,14 +18,14 @@ public class AuthController {
     private UserService userService;
 
 
-    @PostMapping("/register")
+    @PostMapping("/saveUser")
     @ResponseStatus(HttpStatus.CREATED)
     public UserResponseDTO saveUtenti(@RequestBody @Validated UserDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             System.out.println(validationResult.getAllErrors());
             throw new BadRequestException(validationResult.getAllErrors());
         }
-        System.out.println(body);
-        return new UserResponseDTO(this.userService.saveUser(body).getId());
+
+        return new UserResponseDTO(this.userService.saveUser(body));
     }
 }

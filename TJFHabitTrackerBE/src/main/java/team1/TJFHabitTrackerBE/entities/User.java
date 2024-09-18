@@ -22,7 +22,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonIgnoreProperties({"id", "password", "enabled", "authorities", "accountNonLocked", "credentialsNonExpired", "accountNonExpired"})
 
-public class User  {
+public class User  implements UserDetails{
     @Id
     private String id;
     private String email;
@@ -37,5 +37,20 @@ public class User  {
         this.email = email;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
     }
 }

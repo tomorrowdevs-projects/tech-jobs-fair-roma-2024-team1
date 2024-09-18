@@ -3,10 +3,16 @@ import { Container, Dropdown, Navbar } from "react-bootstrap";
 import styles from "../component/MyNav.module.css";
 import logo from "../assets/logo.svg";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const MyNav = () => {
   const { isSignedIn, user } = useUser();
   const [userData, setUserData] = useState(null);
+  const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+    navigate("/");
+  };
   useEffect(() => {
     if (user) {
       const userData = {
@@ -21,7 +27,7 @@ const MyNav = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch("http://localhost:3001/auth/register", {
+        const response = await fetch("http://localhost:3001/auth/saveUser", {
           method: "POST",
           body: JSON.stringify(userData),
           headers: {
@@ -29,6 +35,7 @@ const MyNav = () => {
           },
         });
         const data = await response.json();
+        localStorage.setItem("authToken", data.tokenHabits);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -40,6 +47,7 @@ const MyNav = () => {
     console.log(userData);
     fetchUsers();
   }, [userData]);
+
   return (
     <>
       <Navbar className={`${styles.navBar} py-0`}>
@@ -63,7 +71,7 @@ const MyNav = () => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu className={`${styles.navBar} ${styles.narrowDropdown}`}>
                   <Dropdown.Item className={`${styles.navBar}`}>
-                    <SignOutButton>
+                    <SignOutButton onClick={handleLogout}>
                       <span className={`${styles.navText} py-3 m-0`}>Sign out</span>
                     </SignOutButton>
                   </Dropdown.Item>

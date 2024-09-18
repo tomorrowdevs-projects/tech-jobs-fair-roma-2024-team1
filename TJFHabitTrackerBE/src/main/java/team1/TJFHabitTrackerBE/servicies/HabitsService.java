@@ -46,8 +46,9 @@ public class HabitsService {
         return habitsRepository.findByCompleted(true, pageable);
     }
 
-    public Habits saveHabits(HabitsDTO body) {
-        User found = this.userService.findById(body.user());
+    public Habits saveHabits(HabitsDTO body, String userId) {
+
+        User found = this.userService.findById(userId);
         Habits habit = new Habits(body.name(), convertStringToFrequency(body.frequency()), body.reminder(), body.createdAt(), body.updatedAt(), body.completed(), found);
 
         return habitsRepository.save(habit);

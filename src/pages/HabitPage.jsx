@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import styles from "./HabitPage.module.css";
+import { useDispatch } from "react-redux";
+import { AddNewHabits } from "../redux/action/habit";
 
 const HabitPage = () => {
   const [dates, setDates] = useState([]);
@@ -9,7 +11,7 @@ const HabitPage = () => {
   const [reminder, setReminder] = useState(false);
   const [habits, setHabits] = useState([]);
   const [newHabitName, setNewHabitName] = useState("");
-
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const getCalendarDates = () => {
@@ -40,15 +42,18 @@ const HabitPage = () => {
   const handleSaveHabit = () => {
     if (newHabitName.trim() !== "") {
       const frequency = document.getElementById("habitFrequency").value;
+
       const newHabit = {
         name: newHabitName,
-        completions: Array(5).fill(false),
         frequency: frequency,
         reminder: reminder,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completed: false,
       };
-      const updatedHabits = [...habits, newHabit];
-      setHabits(updatedHabits);
-      localStorage.setItem("habits", JSON.stringify(updatedHabits));
+
+      dispatch(AddNewHabits(newHabit));
+
       setNewHabitName("");
       setReminder(false);
       handleModalToggle();

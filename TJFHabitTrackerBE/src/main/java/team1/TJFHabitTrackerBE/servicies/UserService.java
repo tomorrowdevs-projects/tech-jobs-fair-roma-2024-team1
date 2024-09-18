@@ -12,6 +12,7 @@ import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
 import team1.TJFHabitTrackerBE.exceptions.NotFoundException;
 import team1.TJFHabitTrackerBE.payload.UsersDTO.UserDTO;
 import team1.TJFHabitTrackerBE.repositories.UserRepository;
+import team1.TJFHabitTrackerBE.security.JwtTool;
 
 import java.util.UUID;
 
@@ -20,7 +21,8 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private JwtTool jwtTool;
 
 
 
@@ -31,14 +33,14 @@ public class UserService {
         return userRepository.findAll(pageable);
     }
 
-    public User saveUser(UserDTO body) {
-        this.userRepository.findByEmail(body.email()).ifPresent(utente -> {
-            throw new BadRequestException("The user with email: " + body.email() + ", already exist.");
-        });
-
+    public String saveUser(UserDTO body) {
+        if(userRepository.findById(body.id()).isPresent()){
+            User user = findById(body.id());
+            return jwtTool.createToken(user);
+        }
         User user = new User(body.id(), body.email(), body.createdAt(), body.updatedAt());
-
-        return userRepository.save(user);
+        userRepository.save(user);
+        return jwtTool.createToken(user);
     }
 
 
