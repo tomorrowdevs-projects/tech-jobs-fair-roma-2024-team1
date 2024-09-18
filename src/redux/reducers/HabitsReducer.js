@@ -17,6 +17,7 @@ const initialState = {
   content: null,
   errorMsg: null,
   allHabits: null,
+  completation: [],
 };
 const HabitsReducer = (state = initialState, action) => {
   switch (action.type) {
