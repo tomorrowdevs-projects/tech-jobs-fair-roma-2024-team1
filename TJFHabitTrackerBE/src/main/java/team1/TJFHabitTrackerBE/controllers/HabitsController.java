@@ -27,17 +27,21 @@ public class HabitsController {
 
 
     @GetMapping
-    public Page<Habits> getHabits(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-                                  @RequestParam(defaultValue = "id") String sortBy, @AuthenticationPrincipal User user) {
+    public Page<Habits> getHabits(@RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "10") int size,
+                                  @RequestParam(defaultValue = "id") String sortBy,
+                                  @AuthenticationPrincipal User user) {
 
-        return this.habitsService.getAllHabits(page, size, sortBy);
+        return this.habitsService.getAllHabits(page, size, sortBy, user.getId());
     }
 
     @GetMapping("/completed")
-    public Page<Habits> getHabitsCompleted(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-                                  @RequestParam(defaultValue = "id") String sortBy) {
+    public Page<Habits> getHabitsCompleted(@RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "10") int size,
+                                           @RequestParam(defaultValue = "id") String sortBy,
+                                           @AuthenticationPrincipal User user) {
 
-        return this.habitsService.getAllHabitsCompleted(page, size, sortBy);
+        return this.habitsService.getAllHabitsCompleted(page, size, sortBy, user.getId());
     }
 
     @PostMapping

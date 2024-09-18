@@ -71,8 +71,10 @@ const MyNav = () => {
                 </Dropdown.Toggle>
                 <Dropdown.Menu className={`${styles.navBar} ${styles.narrowDropdown}`}>
                   <Dropdown.Item className={`${styles.navBar}`}>
-                    <SignOutButton onClick={handleLogout}>
-                      <span className={`${styles.navText} py-3 m-0`}>Sign out</span>
+                    <SignOutButton>
+                      <span className={`${styles.navText} py-3 m-0`} onClick={handleLogout}>
+                        Sign out
+                      </span>
                     </SignOutButton>
                   </Dropdown.Item>
                 </Dropdown.Menu>

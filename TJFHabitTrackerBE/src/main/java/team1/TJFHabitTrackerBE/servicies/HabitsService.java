@@ -34,16 +34,16 @@ public class HabitsService {
 
 
 
-    public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy) {
+    public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
         if (pageSize > 20) pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
-        return habitsRepository.findAll(pageable);
+        return habitsRepository.findByUserId(userId, pageable);
     }
 
-    public Page<Habits> getAllHabitsCompleted(int pageNumber, int pageSize, String sortBy) {
+    public Page<Habits> getAllHabitsCompleted(int pageNumber, int pageSize, String sortBy, String userId) {
         if (pageSize > 20) pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
-        return habitsRepository.findByCompleted(true, pageable);
+        return habitsRepository.findByUserIdAndCompleted(userId, true, pageable);
     }
 
     public Habits saveHabits(HabitsDTO body, String userId) {

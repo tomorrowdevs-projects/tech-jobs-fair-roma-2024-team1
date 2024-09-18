@@ -1,4 +1,4 @@
-import { ADD_NEW_HABITS_FAILURE, ADD_NEW_HABITS_REQUEST, ADD_NEW_HABITS_SUCCESS, RESET_HABITS_STATE } from "../action/habit";
+import { ADD_NEW_HABITS_FAILURE, ADD_NEW_HABITS_REQUEST, ADD_NEW_HABITS_SUCCESS, GET_HABITS, GET_HABITS_FAILURE, RESET_HABITS_STATE } from "../action/habit";
 
 const initialState = {
   loading: false,
@@ -6,6 +6,7 @@ const initialState = {
   error: false,
   content: null,
   errorMsg: null,
+  allHabits: [],
 };
 const HabitsReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -17,6 +18,10 @@ const HabitsReducer = (state = initialState, action) => {
       return { ...state, loading: false, errorMsg: action.payload, success: false, error: true };
     case RESET_HABITS_STATE:
       return initialState;
+    case GET_HABITS:
+      return { ...state, allHabits: [...state.allHabits, action.payload], success: true, error: false, loading: false };
+    case GET_HABITS_FAILURE:
+      return { ...state, error: true, errorMsg: action.payload, success: false, loading: false };
     default:
       return state;
   }
