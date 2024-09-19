@@ -82,6 +82,19 @@ public class HabitsController {
 
     }
 
+    @PatchMapping("/modHabits/{habitsId}")
+    public Habits updateHabits(@PathVariable UUID habitsId, @RequestBody HabitsDTO body, @AuthenticationPrincipal User user) {
+        Habits habit = habitsService.findById(habitsId);
+
+
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedException("You are not authorized to modify this habit.");
+        }
+
+        return habitsService.updateHabits(habitsId, body);
+
+    }
+
     @PostMapping("/frequencies")
     public List<HabitsResponseDTO> saveHabitsByFrequency(@RequestBody @Validated HabitsDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {

@@ -88,6 +88,16 @@ public class HabitsService {
         return habitsRepository.save(found);
     }
 
+    public Habits updateHabits(UUID id, HabitsDTO payload) {
+        Habits found = this.findById(id);
+
+        found.setName(payload.name());
+        found.setFrequency(convertStringToFrequency(payload.frequency()));
+        found.setUpdatedAt(LocalDateTime.now());
+
+        return habitsRepository.save(found);
+    }
+
 
     public List<Habits> saveHabitsByFrequency(HabitsDTO body) {
         User found = this.userService.findById(body.user());
