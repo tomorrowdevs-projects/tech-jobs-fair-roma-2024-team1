@@ -28,7 +28,7 @@ const MyNav = () => {
     if (userData) {
       const fetchUsers = async () => {
         try {
-          const response = await fetch("http://localhost:3001/auth/saveUser", {
+          const response = await fetch("https://gross-kerrie-hackaton-team1-79e26745.koyeb.app/auth/saveUser", {
             method: "POST",
             body: JSON.stringify(userData),
             headers: {

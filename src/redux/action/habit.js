@@ -50,7 +50,7 @@ export const AddNewHabits = (habitsData) => async (dispatch) => {
   const token = localStorage.getItem("authToken");
   dispatch(addNewHabitsRequest());
   try {
-    const response = await fetch("http://localhost:3001/habits", {
+    const response = await fetch("https://gross-kerrie-hackaton-team1-79e26745.koyeb.app/habits", {
       method: "POST",
       body: JSON.stringify(habitsData),
       headers: {
@@ -74,7 +74,7 @@ export const fetchProtectedResource = () => async (dispatch) => {
   const token = localStorage.getItem("authToken");
 
   try {
-    const response = await fetch("http://localhost:3001/habits", {
+    const response = await fetch("https://gross-kerrie-hackaton-team1-79e26745.koyeb.app/habits", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
@@ -98,7 +98,7 @@ export const updateHabitCompletion = (id, completed) => async (dispatch) => {
   dispatch(updateHabitRequest());
 
   try {
-    const response = await fetch(`http://localhost:3001/habits/${id}`, {
+    const response = await fetch(`https://gross-kerrie-hackaton-team1-79e26745.koyeb.app/habits/${id}`, {
       method: "PATCH",
       body: JSON.stringify({ completed }),
       headers: {
@@ -124,7 +124,7 @@ export const updateHabitCompletion = (id, completed) => async (dispatch) => {
 export const DeleteHabit = (habitsId) => async (dispatch) => {
   const token = localStorage.getItem("authToken");
   try {
-    const response = await fetch(`http://localhost:3001/habits/${habitsId}`, {
+    const response = await fetch(`https://gross-kerrie-hackaton-team1-79e26745.koyeb.app/habits/${habitsId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
