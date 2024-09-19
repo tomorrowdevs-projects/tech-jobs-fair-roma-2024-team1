@@ -13,11 +13,13 @@ import team1.TJFHabitTrackerBE.entities.User;
 import team1.TJFHabitTrackerBE.enums.Frequency;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
 import team1.TJFHabitTrackerBE.exceptions.NotFoundException;
+import team1.TJFHabitTrackerBE.payload.HabitsDTO.CompleteHabits;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsDTO;
 import team1.TJFHabitTrackerBE.repositories.HabitsRepository;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,20 +36,21 @@ public class HabitsService {
 
 
 
-    public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy) {
+    public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
         if (pageSize > 20) pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
-        return habitsRepository.findAll(pageable);
+        return habitsRepository.findByUserId(userId, pageable);
     }
 
-    public Page<Habits> getAllHabitsCompleted(int pageNumber, int pageSize, String sortBy) {
+    public Page<Habits> getAllHabitsCompleted(int pageNumber, int pageSize, String sortBy, String userId) {
         if (pageSize > 20) pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
-        return habitsRepository.findByCompleted(true, pageable);
+        return habitsRepository.findByUserIdAndCompleted(userId, true, pageable);
     }
 
-    public Habits saveHabits(HabitsDTO body) {
-        User found = this.userService.findById(body.user());
+    public Habits saveHabits(HabitsDTO body, String userId) {
+
+        User found = this.userService.findById(userId);
         Habits habit = new Habits(body.name(), convertStringToFrequency(body.frequency()), body.reminder(), body.createdAt(), body.updatedAt(), body.completed(), found);
 
         return habitsRepository.save(habit);
@@ -58,11 +61,11 @@ public class HabitsService {
         return this.habitsRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
     }
 
-    public void findHabitsByIdAndDelete(UUID id) {
+
+    public void deleteHabits(UUID id) {
         Habits found = this.findById(id);
         this.habitsRepository.delete(found);
     }
-
 
 //    METODO DI CONVERSIONE DA STRINGA A ENUM (FREQUENCY)
     private static Frequency convertStringToFrequency (String resType){
@@ -76,11 +79,11 @@ public class HabitsService {
         }
     }
 
-    public Habits modifyCompleted(UUID id, HabitsDTO payload) {
+    public Habits modifyCompleted(UUID id, CompleteHabits payload) {
         Habits found = this.findById(id);
 
         found.setCompleted(payload.completed());
-        found.setUpdatedAt(payload.updatedAt());
+        found.setUpdatedAt(LocalDateTime.now());
 
         return habitsRepository.save(found);
     }

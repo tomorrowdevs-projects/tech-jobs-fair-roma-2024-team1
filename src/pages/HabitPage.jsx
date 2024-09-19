@@ -1,17 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import styles from "./HabitPage.module.css";
+import { useDispatch, useSelector } from "react-redux";
+import { AddNewHabits, DeleteHabit, fetchProtectedResource, updateHabitCompletion } from "../redux/action/habit";
 
 const HabitPage = () => {
   const [dates, setDates] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [reminder, setReminder] = useState(false);
-  const [habits, setHabits] = useState([]);
+
   const [newHabitName, setNewHabitName] = useState("");
-
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
+  const habits = useSelector((state) => state.habits.allHabits);
   const getCalendarDates = () => {
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     const dateArray = [];
@@ -31,8 +34,7 @@ const HabitPage = () => {
 
   useEffect(() => {
     getCalendarDates();
-    const storedHabits = JSON.parse(localStorage.getItem("habits")) || [];
-    setHabits(storedHabits);
+    dispatch(fetchProtectedResource());
   }, []);
 
   const handleModalToggle = () => setShowModal(!showModal);
@@ -40,44 +42,34 @@ const HabitPage = () => {
   const handleSaveHabit = () => {
     if (newHabitName.trim() !== "") {
       const frequency = document.getElementById("habitFrequency").value;
+
       const newHabit = {
         name: newHabitName,
-        completions: Array(5).fill(false),
         frequency: frequency,
         reminder: reminder,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        completed: false,
       };
-      const updatedHabits = [...habits, newHabit];
-      setHabits(updatedHabits);
-      localStorage.setItem("habits", JSON.stringify(updatedHabits));
+
+      dispatch(AddNewHabits(newHabit));
+
       setNewHabitName("");
       setReminder(false);
       handleModalToggle();
     }
   };
 
-  const toggleHabitCompletion = (habitIndex, dateIndex) => {
-    setHabits((prevHabits) => {
-      const updatedHabits = prevHabits.map((habit, index) => {
-        if (index === habitIndex) {
-          const newCompletions = [...habit.completions];
-          newCompletions[dateIndex] = !newCompletions[dateIndex];
-          return { ...habit, completions: newCompletions };
-        }
-        return habit;
-      });
-      localStorage.setItem("habits", JSON.stringify(updatedHabits));
-      return updatedHabits;
-    });
+  const handleCompletionToggle = (id, currentStatus) => {
+    dispatch(updateHabitCompletion(id, !currentStatus));
   };
 
   const handleChartNavigation = () => {
     navigate("/habit-chart", { state: { habits: habits } });
   };
 
-  const handleDeleteHabit = (habitIndex) => {
-    const updatedHabits = habits.filter((_, index) => index !== habitIndex);
-    setHabits(updatedHabits);
-    localStorage.setItem("habits", JSON.stringify(updatedHabits));
+  const handleDeleteHabit = (habitId) => {
+    dispatch(DeleteHabit(habitId));
   };
 
   return (
@@ -114,29 +106,24 @@ const HabitPage = () => {
           </div>
         </div>
 
-        {habits.map((habit, habitIndex) => (
-          <div key={habitIndex} className={`${styles.habitRow} d-flex align-items-center mb-3`}>
-            <div className={`${styles.habitName} d-flex align-items-center`}>
-              {habit.name}
-              <button className={`${styles.deleteButton} ms-2`} onClick={() => handleDeleteHabit(habitIndex)} aria-label="Delete habit">
-                ×
+        {habits && habits.content && habits.content.length > 0 ? (
+          habits.content.map((habit) => (
+            <div key={habit.id} className={`${styles.habitRow} d-flex align-items-center mb-3`}>
+              <div className={`${styles.habitName} d-flex align-items-center`}>
+                Name: {habit.name} Frequency: {habit.frequency}
+                <button className={`${styles.deleteButton} ms-2`} onClick={() => handleDeleteHabit(habit.id)} aria-label="Delete habit">
+                  ×
+                </button>
+              </div>
+              <button
+                className={`${styles.completionButton} ${habit.completed ? styles.completed : styles.notCompleted}`}
+                onClick={() => handleCompletionToggle(habit.id, habit.completed)}
+              >
+                {habit.completed ? "✔" : "×"}
               </button>
             </div>
-            <div className={`${styles.completionStrip} d-flex justify-content-between`}>
-              {habit.completions.map((completed, dateIndex) => (
-                <button
-                  key={`${habitIndex}-${dateIndex}`}
-                  className={`${styles.completionButton} ${completed ? styles.completed : styles.notCompleted}`}
-                  onClick={() => toggleHabitCompletion(habitIndex, dateIndex)}
-                >
-                  {completed ? "✔" : "×"}
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-
-        {habits.length === 0 && (
+          ))
+        ) : (
           <div className="flex-grow-1 d-flex align-items-center justify-content-center">
             <div className={`${styles.bigCircle} d-flex align-items-center justify-content-center text-center mt-4 p-3`}>You have no active habits</div>
           </div>

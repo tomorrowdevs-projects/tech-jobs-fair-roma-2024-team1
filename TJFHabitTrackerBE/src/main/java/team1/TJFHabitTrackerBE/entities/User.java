@@ -10,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,20 +22,35 @@ import java.util.UUID;
 @NoArgsConstructor
 @JsonIgnoreProperties({"id", "password", "enabled", "authorities", "accountNonLocked", "credentialsNonExpired", "accountNonExpired"})
 
-public class User  {
+public class User  implements UserDetails{
     @Id
     private String id;
     private String email;
     @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private Date createdAt;
     @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private Date updatedAt;
 
 
-    public User(String id, String email, LocalDateTime createdAt, LocalDateTime updatedAt) {
+    public User(String id, String email, Date createdAt, Date updatedAt) {
         this.id = id;
         this.email = email;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of();
+    }
+
+    @Override
+    public String getPassword() {
+        return "";
+    }
+
+    @Override
+    public String getUsername() {
+        return "";
     }
 }

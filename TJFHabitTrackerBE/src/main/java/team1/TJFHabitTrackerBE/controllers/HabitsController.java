@@ -2,11 +2,15 @@ package team1.TJFHabitTrackerBE.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import team1.TJFHabitTrackerBE.entities.Habits;
+import team1.TJFHabitTrackerBE.entities.User;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
+import team1.TJFHabitTrackerBE.exceptions.UnauthorizedException;
+import team1.TJFHabitTrackerBE.payload.HabitsDTO.CompleteHabits;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsResponseDTO;
 import team1.TJFHabitTrackerBE.servicies.HabitsService;
@@ -25,39 +29,56 @@ public class HabitsController {
 
 
     @GetMapping
-    public Page<Habits> getHabits(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-                                  @RequestParam(defaultValue = "id") String sortBy) {
+    public Page<Habits> getHabits(@RequestParam(defaultValue = "0") int page,
+                                  @RequestParam(defaultValue = "10") int size,
+                                  @RequestParam(defaultValue = "id") String sortBy,
+                                  @AuthenticationPrincipal User user) {
 
-        return this.habitsService.getAllHabits(page, size, sortBy);
+        return this.habitsService.getAllHabits(page, size, sortBy, user.getId());
     }
 
     @GetMapping("/completed")
-    public Page<Habits> getHabitsCompleted(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size,
-                                  @RequestParam(defaultValue = "id") String sortBy) {
+    public Page<Habits> getHabitsCompleted(@RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "10") int size,
+                                           @RequestParam(defaultValue = "id") String sortBy,
+                                           @AuthenticationPrincipal User user) {
 
-        return this.habitsService.getAllHabitsCompleted(page, size, sortBy);
+        return this.habitsService.getAllHabitsCompleted(page, size, sortBy, user.getId());
     }
 
     @PostMapping
-    public HabitsResponseDTO saveHabits(@RequestBody @Validated HabitsDTO body, BindingResult validationResult){
+    public HabitsResponseDTO saveHabits(@RequestBody @Validated HabitsDTO body, BindingResult validationResult, @AuthenticationPrincipal User user){
         if (validationResult.hasErrors()) {
             System.out.println(validationResult.getAllErrors());
             throw new BadRequestException(validationResult.getAllErrors());
         }
         System.out.println(body);
-        return new HabitsResponseDTO(this.habitsService.saveHabits(body).getId());
+        return new HabitsResponseDTO(this.habitsService.saveHabits(body, user.getId()).getId());
 
     }
 
     @DeleteMapping("/{habitsId}")
-    public void deleteHabits(@PathVariable UUID habitsId) {
-        habitsService.findHabitsByIdAndDelete(habitsId);
+    public void deleteHabits(@PathVariable UUID habitsId, @AuthenticationPrincipal User user) {
+        Habits habit = habitsService.findById(habitsId);
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedException("You are not authorized to delete this habit.");
+        }
+
+        habitsService.deleteHabits(habitsId);
+
     }
 
 
     @PatchMapping("/{habitsId}")
-    public Habits modifyComplete(@PathVariable UUID habitsId, @RequestBody HabitsDTO body) {
-        return this.habitsService.modifyCompleted(habitsId, body);
+    public Habits modifyComplete(@PathVariable UUID habitsId, @RequestBody CompleteHabits body, @AuthenticationPrincipal User user) {
+        Habits habit = habitsService.findById(habitsId);
+
+
+        if (!habit.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedException("You are not authorized to modify this habit.");
+        }
+
+        return habitsService.modifyCompleted(habitsId, body);
 
     }
 

@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import PropTypes from "prop-types";
 import HabitPage from "./pages/HabitPage";
-import HabitChartPage from "./pages/HabitChartPage"; 
+import HabitChartPage from "./pages/HabitChartPage";
 import SignUpPage from "./pages/Registration/SignUpPage";
 import SignInPage from "./pages/SignIn/SignInPage";
 import MyNav from "./component/MyNav";
@@ -52,6 +52,7 @@ function App() {
         />
         <Route path="/signUp" element={<SignUpPage />} />
         <Route path="/signIn" element={<SignInPage />} />
+
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
