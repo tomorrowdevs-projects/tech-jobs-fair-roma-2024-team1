@@ -20,7 +20,7 @@ public class AuthController {
 
     @PostMapping("/saveUser")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO saveUtenti(@RequestBody @Validated UserDTO body, BindingResult validationResult) {
+    public UserResponseDTO saveUser(@RequestBody @Validated UserDTO body, BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             System.out.println(validationResult.getAllErrors());
             throw new BadRequestException(validationResult.getAllErrors());

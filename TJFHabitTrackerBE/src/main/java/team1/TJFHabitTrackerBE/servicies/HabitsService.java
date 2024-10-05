@@ -1,25 +1,20 @@
 package team1.TJFHabitTrackerBE.servicies;
 
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
-import team1.TJFHabitTrackerBE.entities.Habits;
-import team1.TJFHabitTrackerBE.entities.Notifications;
-import team1.TJFHabitTrackerBE.entities.User;
+import team1.TJFHabitTrackerBE.entities.*;
 import team1.TJFHabitTrackerBE.enums.Frequency;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
 import team1.TJFHabitTrackerBE.exceptions.NotFoundException;
-import team1.TJFHabitTrackerBE.payload.HabitsDTO.CompleteHabits;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
-import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsDTO;
+import team1.TJFHabitTrackerBE.repositories.HabitCompletionRepository;
 import team1.TJFHabitTrackerBE.repositories.HabitsRepository;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,31 +24,75 @@ import java.util.UUID;
 public class HabitsService {
     @Autowired
     private HabitsRepository habitsRepository;
+
+    @Getter
     @Autowired
     private UserService userService;
+
     @Autowired
     private NotificationsRepository notificationsRepository;
 
+    @Autowired
+    private CategoryService categoryService;
+
+    @Autowired
+    private HabitCompletionRepository habitCompletionRepository;
 
 
-    public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
-        if (pageSize > 20) pageSize = 20;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
-        return habitsRepository.findByUserId(userId, pageable);
-    }
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
-    public Page<Habits> getAllHabitsCompleted(int pageNumber, int pageSize, String sortBy, String userId) {
-        if (pageSize > 20) pageSize = 20;
-        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
-        return habitsRepository.findByUserIdAndCompleted(userId, true, pageable);
-    }
+// get all habit
+public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
 
-    public Habits saveHabits(HabitsDTO body, String userId) {
 
-        User found = this.userService.findById(userId);
-        Habits habit = new Habits(body.name(), convertStringToFrequency(body.frequency()), body.reminder(), body.createdAt(), body.updatedAt(), body.completed(), found);
 
-        return habitsRepository.save(habit);
+    if (pageSize > 20) pageSize = 20;
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy).descending());
+
+    // Recupera abitudini proprietarie
+    Page<Habits> ownedHabits = habitsRepository.findByOwnerIdAndCompleted(userId, false, pageable);
+
+    // Recupera abitudini condivise
+    Page<Habits> sharedHabits = habitsRepository.findByUsers_IdAndCompleted(userId, false, pageable);
+
+
+    List<Habits> combinedList = new ArrayList<>();
+    combinedList.addAll(ownedHabits.getContent());
+    combinedList.addAll(sharedHabits.getContent());
+
+    return new PageImpl<>(combinedList, pageable, ownedHabits.getTotalElements() + sharedHabits.getTotalElements());
+}
+
+// save habit
+    public Habits saveHabits(HabitsDTO body, String currentUserId) {
+User currentUser = userService.findById(currentUserId);
+Category category = categoryService.findByName(body.category());
+
+        Habits habit = new Habits(
+                body.name(),
+                convertStringToFrequency(body.frequency()),
+                body.reminder(),
+                LocalDateTime.now(),
+                LocalDateTime.now(),
+                body.completed(),
+                category,
+                currentUser
+        );
+        // Aggiungi utenti condivisi
+        for (String userId : body.users()) {
+            if (!userId.equals(currentUserId)) { // Evita di aggiungere il creatore due volte
+                User user = userService.findById(userId);
+                habit.addUser(user);
+            }
+        }
+        Habits savedHabit = habitsRepository.save(habit);
+
+
+        // Pubblica un evento per notificare la creazione dell'abitudine
+        eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, currentUser));
+
+        return savedHabit;
     }
 
 
@@ -78,24 +117,53 @@ public class HabitsService {
             throw new BadRequestException("The selected reservation frequency don't exists");
         }
     }
+// completa abitudine
 
-    public Habits modifyCompleted(UUID id, CompleteHabits payload) {
-        Habits found = this.findById(id);
+    public HabitCompletion completeHabit(UUID habitId, User user) {
+       Habits habit = findById(habitId);
+        if (!habit.getUsers().contains(user)) {
+            throw new NotFoundException("You are not authorized to complete this habit.");
+        }
+        HabitCompletion completion = new HabitCompletion(habit, user, LocalDateTime.now());
+       habitCompletionRepository.save(completion);
+        habit.addCompletion(completion);
+        habitsRepository.save(habit);
 
-        found.setCompleted(payload.completed());
-        found.setUpdatedAt(LocalDateTime.now());
+        // Aggiorna lo stato completato se necessario
+        habit.setCompleted(true);
+        habitsRepository.save(habit);
 
-        return habitsRepository.save(found);
+        return completion;
+    }
+    // get all completion
+    public Page<HabitCompletion> getCompletions(int pageNumber, int pageSize, String sortBy, User user) {
+        if (pageSize > 20) pageSize = 20;
+        Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
+        return habitCompletionRepository.findByUserId(user.getId(), pageable);
     }
 
-    public Habits updateHabits(UUID id, HabitsDTO payload) {
+
+    public Habits updateHabits(UUID id, HabitsDTO payload, User user) {
         Habits found = this.findById(id);
+
+        if (!found.getOwner().getId().equals(user.getId())) {
+            throw new NotFoundException("You are not authorized to modify this habit.");
+        }
 
         found.setName(payload.name());
         found.setFrequency(convertStringToFrequency(payload.frequency()));
         found.setUpdatedAt(LocalDateTime.now());
 
-        return habitsRepository.save(found);
+        if (payload.category() != null) {
+            Category category = categoryService.findByName(payload.category());
+            found.setCategory(category);
+        }
+
+        Habits updatedHabit = habitsRepository.save(found);
+        // Pubblica un evento per notificare l'aggiornamento dell'abitudine
+        eventPublisher.publishEvent(new HabitCreatedEvent(this, updatedHabit, user));
+
+        return updatedHabit;
     }
 
 
@@ -104,43 +172,86 @@ public class HabitsService {
         Frequency frequency = convertStringToFrequency(body.frequency());
         List<Habits> createdHabits = new ArrayList<>();
 
-        // Logic to create habits based on frequency
-        if (frequency == Frequency.EVERYDAY) {
-            for (int i = 0; i < 7; i++) { // Create 7 daily habits
-                Habits habit = new Habits(body.name(), frequency, body.reminder(), body.createdAt().plusDays(i), body.updatedAt(), body.completed(), found);
-                createdHabits.add(habitsRepository.save(habit));
-                createNotificationIfReminder(habit, found);
-            }
-        } else if (frequency == Frequency.EVERY3DAYS) {
-            for (int i = 0; i < 4; i++) { // Create 4 habits every 3 days
-                Habits habit = new Habits(body.name(), frequency, body.reminder(), body.createdAt().plusDays(i * 3), body.updatedAt(), body.completed(), found);
-                createdHabits.add(habitsRepository.save(habit));
-                createNotificationIfReminder(habit, found);
-            }
-        } else if (frequency == Frequency.ONCEAWEEK) {
-            for (int i = 0; i < 12; i++) { // Create 12 weekly habits
-                Habits habit = new Habits(body.name(), frequency, body.reminder(), body.createdAt().plusWeeks(i), body.updatedAt(), body.completed(), found);
-                createdHabits.add(habitsRepository.save(habit));
-                createNotificationIfReminder(habit, found);
-            }
-        } else if (frequency == Frequency.ONCEAMONTH) {
-            for (int i = 0; i < 12; i++) { // Create 12 monthly habits
-                Habits habit = new Habits(body.name(), frequency, body.reminder(), body.createdAt().plusMonths(i), body.updatedAt(), body.completed(), found);
-                createdHabits.add(habitsRepository.save(habit));
-                createNotificationIfReminder(habit, found);
-            }
+        // Logica per creare abitudini basate sulla frequenza
+        switch (frequency) {
+            case EVERYDAY:
+                for (int i = 0; i < 7; i++) { // Crea 7 abitudini giornaliere
+                    Habits habit = new Habits(
+                            body.name(),
+                            frequency,
+                            body.reminder(),
+                            LocalDateTime.now().plusDays(i),
+                            LocalDateTime.now(),
+                            body.completed(),
+                            categoryService.findByName(body.category()),
+                            found
+                    );
+                    Habits savedHabit = habitsRepository.save(habit);
+                    createdHabits.add(savedHabit);
+                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
+                }
+                break;
+            case EVERY3DAYS:
+                for (int i = 0; i < 4; i++) { // Crea 4 abitudini ogni 3 giorni
+                    Habits habit = new Habits(
+                            body.name(),
+                            frequency,
+                            body.reminder(),
+                            LocalDateTime.now().plusDays(i * 3),
+                           LocalDateTime.now(),
+                            body.completed(),
+                            categoryService.findByName(body.category()),
+                            found
+                    );
+                    Habits savedHabit = habitsRepository.save(habit);
+                    createdHabits.add(savedHabit);
+                    // Pubblica un evento per ogni abitudine creata
+                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
+
+                }
+                break;
+            case ONCEAWEEK:
+                for (int i = 0; i < 12; i++) { // Crea 12 abitudini settimanali
+                    Habits habit = new Habits(
+                            body.name(),
+                            frequency,
+                            body.reminder(),
+                            LocalDateTime.now().plusWeeks(i),
+                            LocalDateTime.now(),
+                            body.completed(),
+                            categoryService.findByName(body.category()),
+                            found
+                    );
+                    Habits savedHabit = habitsRepository.save(habit);
+                    createdHabits.add(savedHabit);
+                    // Pubblica un evento per ogni abitudine creata
+                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
+                }
+                break;
+            case ONCEAMONTH:
+                for (int i = 0; i < 12; i++) { // Crea 12 abitudini mensili
+                    Habits habit = new Habits(
+                            body.name(),
+                            frequency,
+                            body.reminder(),
+                            LocalDateTime.now().plusMonths(i),
+                           LocalDateTime.now(),
+                            body.completed(),
+                            categoryService.findByName(body.category()),
+                            found
+                    );
+                    Habits savedHabit = habitsRepository.save(habit);
+                    createdHabits.add(savedHabit);
+                    // Pubblica un evento per ogni abitudine creata
+                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
+                }
+                break;
+            default:
+                throw new BadRequestException("Unsupported frequency type");
         }
 
         return createdHabits;
     }
-
-    private void createNotificationIfReminder(Habits habit, User user) {
-        if (habit.isReminder()) {
-            Notifications notify = new Notifications(user, habit, "Remember your habit: " + habit.getName(), LocalDateTime.now(), null);
-            notificationsRepository.save(notify);
-        }
-    }
-
 
 
 }

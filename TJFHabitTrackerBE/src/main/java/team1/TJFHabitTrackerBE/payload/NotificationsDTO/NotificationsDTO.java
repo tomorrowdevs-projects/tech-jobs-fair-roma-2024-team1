@@ -14,6 +14,6 @@ public record NotificationsDTO(
         UUID habits,
         String message,
         LocalDateTime scheduledAt,
-        LocalDateTime sent_at
+        LocalDateTime sentAt
 ) {
 }

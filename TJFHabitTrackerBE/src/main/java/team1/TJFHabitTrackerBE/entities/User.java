@@ -9,10 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 @Entity
@@ -20,7 +17,11 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
-@JsonIgnoreProperties({"id", "password", "enabled", "authorities", "accountNonLocked", "credentialsNonExpired", "accountNonExpired"})
+@JsonIgnoreProperties({
+        "password", "enabled", "authorities",
+        "accountNonLocked", "credentialsNonExpired",
+        "accountNonExpired", "habits", "habitCompletions"
+})
 
 public class User  implements UserDetails{
     @Id
@@ -30,6 +31,11 @@ public class User  implements UserDetails{
     private Date createdAt;
     @Column(name = "updated_at")
     private Date updatedAt;
+    @ManyToMany(mappedBy = "users")
+    private Set<Habits> habits = new HashSet<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HabitCompletion> habitCompletions = new ArrayList<>();
 
 
     public User(String id, String email, Date createdAt, Date updatedAt) {
@@ -51,6 +57,6 @@ public class User  implements UserDetails{
 
     @Override
     public String getUsername() {
-        return "";
+        return this.email;
     }
 }

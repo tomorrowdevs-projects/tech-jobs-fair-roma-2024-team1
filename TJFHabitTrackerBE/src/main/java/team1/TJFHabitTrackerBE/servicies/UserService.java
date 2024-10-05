@@ -26,12 +26,13 @@ public class UserService {
 
 
 
-
+// get all users
     public Page<User> getAllUsers(int pageNumber, int pageSize, String sortBy) {
         if (pageSize > 20) pageSize = 20;
         Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy));
         return userRepository.findAll(pageable);
     }
+    // save user
 
     public String saveUser(UserDTO body) {
         if(userRepository.findById(body.id()).isPresent()){

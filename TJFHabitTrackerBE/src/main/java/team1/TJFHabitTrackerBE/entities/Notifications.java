@@ -29,13 +29,15 @@ public class Notifications {
     @Column(name = "scheduled_at")
     private LocalDateTime scheduledAt;
     @Column(name = "sent_at")
-    private LocalDateTime sent_at;
+    private LocalDateTime sentAt;
 
     public Notifications(User user, Habits habits, String message, LocalDateTime scheduledAt, LocalDateTime sent_at) {
         this.user = user;
         this.habits = habits;
         this.message = message;
         this.scheduledAt = scheduledAt;
-        this.sent_at = sent_at;
+        this.sentAt = sent_at;
     }
+
+
 }

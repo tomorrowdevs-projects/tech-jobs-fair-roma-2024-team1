@@ -9,14 +9,14 @@ import lombok.ToString;
 import team1.TJFHabitTrackerBE.enums.Frequency;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Table(name = "habits")
 @Getter
 @Setter
 @NoArgsConstructor
-@ToString
+@ToString (exclude = {"users", "habitCompletions"})
 public class Habits {
     @Id
     @GeneratedValue
@@ -31,18 +31,53 @@ public class Habits {
     private LocalDateTime updatedAt;
     private boolean completed;
     @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_habits",
+            joinColumns = @JoinColumn(name = "habit_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> users = new HashSet<>();
+
+    @OneToMany(mappedBy = "habit", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<HabitCompletion> habitCompletions = new ArrayList<>();
+
+    @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User owner;
 
-
-    public Habits(String name, Frequency frequency, boolean reminder, LocalDateTime createdAt, LocalDateTime updatedAt, boolean completed, User user) {
+    public Habits(String name, Frequency frequency, boolean reminder, LocalDateTime createdAt, LocalDateTime updatedAt, boolean completed, Category category, User owner) {
         this.name = name;
         this.frequency = frequency;
         this.reminder = reminder;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
         this.completed = completed;
-        this.user = user;
+        this.owner = owner;
+        this.users.add(owner);
+    }
+    public void addUser(User user) {
+        users.add(user);
+        user.getHabits().add(this);
+    }
+
+    public void removeUser(User user) {
+        users.remove(user);
+        user.getHabits().remove(this);
+    }
+
+    // Metodi per gestire le completazioni
+    public void addCompletion(HabitCompletion completion) {
+        habitCompletions.add(completion);
+        completion.setHabit(this);
+    }
+
+    public void removeCompletion(HabitCompletion completion) {
+        habitCompletions.remove(completion);
+        completion.setHabit(null);
     }
 }
 

@@ -5,19 +5,18 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public record HabitsDTO(
-        @NotEmpty(message = "The name field is required")
-        @Size(min = 2, message = "The name field is min 2 characters")
+        @NotEmpty (message = "Il campo name è obbligatorio")
         String name,
-        @NotEmpty(message = "The frequency field is required")
+        @NotEmpty (message = "Il campo frequency è obbligatorio")
         String frequency,
         boolean reminder,
-        @NotNull(message = "The field created at is required")
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt,
         boolean completed,
-        String user
+        List<String> users, // Lista di ID utente per abitudini condivise
+        String category,
+        String user// stringa per categoria
 ) {
 }
