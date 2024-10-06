@@ -16,7 +16,6 @@ public record HabitsDTO(
         boolean reminder,
         boolean completed,
         List<String> users, // Lista di ID utente per abitudini condivise
-        String category,
-        String user// stringa per categoria
+        String category// stringa per categoria
 ) {
 }

@@ -166,19 +166,22 @@ Category category = categoryService.findByName(body.category());
 
 
     public List<Habits> saveHabitsByFrequency(HabitsDTO body) {
-        User found = this.userService.findById(body.user());
-        Frequency frequency = convertStringToFrequency(body.frequency());
         List<Habits> createdHabits = new ArrayList<>();
+        for (int i = 0; i < body.users().size(); i++) {
 
-        // Logica per creare abitudini basate sulla frequenza
+        User found = this.userService.findById(body.users().get(i));
+            if (found == null) {
+                throw new NotFoundException("User not found with ID: " + body.users().get(i));
+            }
+         Frequency frequency = convertStringToFrequency(body.frequency());
         switch (frequency) {
             case EVERYDAY:
-                for (int i = 0; i < 7; i++) { // Crea 7 abitudini giornaliere
+                for (int j = 0; j < 7; j++) { // Crea 7 abitudini giornaliere
                     Habits habit = new Habits(
                             body.name(),
                             frequency,
                             body.reminder(),
-                            LocalDateTime.now().plusDays(i),
+                            LocalDateTime.now().plusDays(j),
                             LocalDateTime.now(),
                             body.completed(),
                             categoryService.findByName(body.category()),
@@ -190,12 +193,12 @@ Category category = categoryService.findByName(body.category());
                 }
                 break;
             case EVERY3DAYS:
-                for (int i = 0; i < 4; i++) { // Crea 4 abitudini ogni 3 giorni
+                for (int j = 0; j < 4; j++) { // Crea 4 abitudini ogni 3 giorni
                     Habits habit = new Habits(
                             body.name(),
                             frequency,
                             body.reminder(),
-                            LocalDateTime.now().plusDays(i * 3),
+                            LocalDateTime.now().plusDays(j * 3),
                            LocalDateTime.now(),
                             body.completed(),
                             categoryService.findByName(body.category()),
@@ -209,12 +212,12 @@ Category category = categoryService.findByName(body.category());
                 }
                 break;
             case ONCEAWEEK:
-                for (int i = 0; i < 12; i++) { // Crea 12 abitudini settimanali
+                for (int j = 0; j < 12; j++) { // Crea 12 abitudini settimanali
                     Habits habit = new Habits(
                             body.name(),
                             frequency,
                             body.reminder(),
-                            LocalDateTime.now().plusWeeks(i),
+                            LocalDateTime.now().plusWeeks(j),
                             LocalDateTime.now(),
                             body.completed(),
                             categoryService.findByName(body.category()),
@@ -227,12 +230,12 @@ Category category = categoryService.findByName(body.category());
                 }
                 break;
             case ONCEAMONTH:
-                for (int i = 0; i < 12; i++) { // Crea 12 abitudini mensili
+                for (int j = 0; j < 12; j++) { // Crea 12 abitudini mensili
                     Habits habit = new Habits(
                             body.name(),
                             frequency,
                             body.reminder(),
-                            LocalDateTime.now().plusMonths(i),
+                            LocalDateTime.now().plusMonths(j),
                            LocalDateTime.now(),
                             body.completed(),
                             categoryService.findByName(body.category()),
@@ -247,6 +250,9 @@ Category category = categoryService.findByName(body.category());
             default:
                 throw new BadRequestException("Unsupported frequency type");
         }
+        }
+
+        // Logica per creare abitudini basate sulla frequenza
 
         return createdHabits;
     }
