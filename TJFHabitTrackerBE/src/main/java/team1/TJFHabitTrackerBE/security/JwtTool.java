@@ -22,7 +22,14 @@ public class JwtTool {
                 .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
                 .compact();
     }
-
+    public String createRefreshToken(User user){
+        return Jwts.builder()
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 30)) // Refresh token scade dopo 30 giorni
+                .subject(String.valueOf(user.getId()))
+                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .compact();
+    }
     public void verifyToken(String token){
         try {
             Jwts.parser().verifyWith(Keys.hmacShaKeyFor(secret.getBytes())).build().parse(token);

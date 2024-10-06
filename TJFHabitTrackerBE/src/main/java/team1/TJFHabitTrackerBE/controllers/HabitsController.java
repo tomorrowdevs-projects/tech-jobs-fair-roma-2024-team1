@@ -16,6 +16,7 @@ import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitCompletionResponseDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsResponseDTO;
 import team1.TJFHabitTrackerBE.payload.UsersDTO.UserDTO;
+import team1.TJFHabitTrackerBE.security.JwtTool;
 import team1.TJFHabitTrackerBE.servicies.HabitsService;
 
 import java.util.List;
@@ -26,7 +27,8 @@ import java.util.stream.Collectors;
 @RequestMapping("/habits")
 public class HabitsController {
 
-
+@Autowired
+private JwtTool jwtTool;
     @Autowired
     private HabitsService habitsService;
 
@@ -37,9 +39,10 @@ public Page<Habits> getHabits(
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "id") String sortBy,
 
-        @AuthenticationPrincipal User user) {
+        @RequestHeader("Authorization") String token) {
+    String userId = jwtTool.extractIdFromToken(token.replace("Bearer ", ""));
 
-    return this.habitsService.getAllHabits(page, size, sortBy, user.getId());
+    return this.habitsService.getAllHabits(page, size, sortBy, userId);
 }
 
 
