@@ -121,7 +121,7 @@ Category category = categoryService.findByName(body.category());
 
     public HabitCompletion completeHabit(UUID habitId, User user) {
        Habits habit = findById(habitId);
-      
+
         HabitCompletion completion = new HabitCompletion(habit, user, LocalDateTime.now());
        habitCompletionRepository.save(completion);
         habit.addCompletion(completion);
