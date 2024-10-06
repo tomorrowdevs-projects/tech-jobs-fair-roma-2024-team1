@@ -15,7 +15,6 @@ public record HabitsDTO(
         String frequency,
         boolean reminder,
         boolean completed,
-
         @NotEmpty (message = "Il campo category è obbligatorio")
         String category// stringa per categoria
 ) {

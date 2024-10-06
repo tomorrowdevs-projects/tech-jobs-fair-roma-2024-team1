@@ -8,6 +8,7 @@ import team1.TJFHabitTrackerBE.exceptions.NotFoundException;
 import team1.TJFHabitTrackerBE.repositories.CategoryRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 public class CategoryService {
@@ -27,6 +28,10 @@ public class CategoryService {
     public Category findByName(String name) {
         return categoryRepository.findByName(name)
                 .orElseThrow(() -> new NotFoundException("Categoria non trovata: " + name));
+    }
+    public Category findById(UUID id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Categoria non trovata con ID: " + id));
     }
 
     /**

@@ -64,6 +64,7 @@ public class Habits {
         this.completed = completed;
         this.owner = owner;
         this.users.add(owner);
+        this.category = category;
     }
     public void addUser(User user) {
         users.add(user);
