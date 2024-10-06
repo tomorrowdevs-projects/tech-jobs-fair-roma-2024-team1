@@ -41,7 +41,8 @@ public class HabitsService {
 
     @Autowired
     private ApplicationEventPublisher eventPublisher;
-
+@Autowired
+private  NotificationService notificationService;
 // get all habit
 public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
 
@@ -116,7 +117,10 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
 
     // Salva l'abitudine nel repository
     Habits savedHabit = habitsRepository.save(habit);
-
+// crea una notifica se è impostato il reminder
+    if(body.reminder()){
+        notificationService.createNotificationIfReminder(habit, currentUser);
+    }
     // Pubblica un evento di creazione abitudine
     eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, currentUser));
 
@@ -186,7 +190,10 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
         }
 
         // Aggiorna il reminder
-        found.setReminder(payload.reminder());
+        if(payload.reminder()){
+            notificationService.createNotificationIfReminder(found, found.getOwner());
+        found.setReminder(true);
+        }
 
         // Aggiorna il completato
         found.setCompleted(payload.completed());
