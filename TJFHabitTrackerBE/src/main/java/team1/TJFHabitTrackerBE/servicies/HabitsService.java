@@ -63,7 +63,17 @@ public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, St
 
     return new PageImpl<>(combinedList, pageable, ownedHabits.getTotalElements() + sharedHabits.getTotalElements());
 }
-
+    //    METODO DI CONVERSIONE DA STRINGA A ENUM (FREQUENCY)
+    private static Frequency convertStringToFrequency (String resType){
+        if (resType == null) {
+            return null;
+        }
+        try{
+            return Frequency.valueOf(resType.toUpperCase());
+        }catch (IllegalArgumentException e) {
+            throw new BadRequestException("The selected reservation frequency don't exists");
+        }
+    }
 // save habit
     public Habits saveHabits(HabitsDTO body, String currentUserId) {
 User currentUser = userService.findById(currentUserId);
@@ -106,17 +116,7 @@ Category category = categoryService.findByName(body.category());
         this.habitsRepository.delete(found);
     }
 
-//    METODO DI CONVERSIONE DA STRINGA A ENUM (FREQUENCY)
-    private static Frequency convertStringToFrequency (String resType){
-        if (resType == null) {
-            return null;
-        }
-        try{
-            return Frequency.valueOf(resType.toUpperCase());
-        }catch (IllegalArgumentException e) {
-            throw new BadRequestException("The selected reservation frequency don't exists");
-        }
-    }
+
 // completa abitudine
 
     public HabitCompletion completeHabit(UUID habitId, User user) {

@@ -46,14 +46,28 @@ public Page<Habits> getHabits(
     // post habits
 
     @PostMapping
-    public HabitsResponseDTO saveHabits(@RequestBody @Validated HabitsDTO body, BindingResult validationResult, @AuthenticationPrincipal User user){
+    public List<HabitsResponseDTO> saveHabits(@RequestBody @Validated HabitsDTO body,
+                                              BindingResult validationResult,
+                                              @AuthenticationPrincipal User user) {
         if (validationResult.hasErrors()) {
             System.out.println(validationResult.getAllErrors());
-            throw new BadRequestException(validationResult.getAllErrors());
+            throw new BadRequestException(validationResult.getAllErrors().toString());
         }
-        System.out.println(body);
-        return new HabitsResponseDTO(this.habitsService.saveHabits(body, user.getId()).getId());
 
+        List<Habits> savedHabits;
+
+        // Se la frequenza è stata selezionata, crea più abitudini
+        if (body.frequency() != null && !body.frequency().isEmpty()) {
+            savedHabits = this.habitsService.saveHabitsByFrequency(body);
+        } else {
+            // Crea una singola abitudine
+            Habits singleHabit = this.habitsService.saveHabits(body, user.getId());
+            savedHabits = List.of(singleHabit);
+        }
+
+        return savedHabits.stream()
+                .map(habit -> new HabitsResponseDTO(habit.getId()))
+                .collect(Collectors.toList());
     }
 // delete habit
     @DeleteMapping("/{habitsId}")
@@ -105,23 +119,7 @@ public Page<Habits> getHabits(
         }
         return habitsService.updateHabits(habitsId, body, user);
     }
-    // save habit by frequency
-
-
-    @PostMapping("/frequencies")
-    public List<HabitsResponseDTO> saveHabitsByFrequency(
-            @RequestBody @Validated HabitsDTO body,
-            BindingResult validationResult) {
-        if (validationResult.hasErrors()) {
-            System.out.println(validationResult.getAllErrors());
-            throw new BadRequestException(validationResult.getAllErrors().toString());
-        }
-        System.out.println(body);
-        List<Habits> savedHabits = this.habitsService.saveHabitsByFrequency(body);
-        return savedHabits.stream()
-                .map(habit -> new HabitsResponseDTO(habit.getId()))
-                .collect(Collectors.toList());
-    }
+ 
 
 
 
