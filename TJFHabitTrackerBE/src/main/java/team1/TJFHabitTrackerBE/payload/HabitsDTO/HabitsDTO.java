@@ -15,7 +15,7 @@ public record HabitsDTO(
         String frequency,
         boolean reminder,
         boolean completed,
-        List<String> users, // Lista di ID utente per abitudini condivise
+
         @NotEmpty (message = "Il campo category è obbligatorio")
         String category// stringa per categoria
 ) {
