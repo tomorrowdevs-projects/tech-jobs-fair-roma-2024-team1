@@ -1,5 +1,6 @@
 package team1.TJFHabitTrackerBE.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @ToString
+
 public class Notifications {
     @Id
     @GeneratedValue
@@ -24,6 +26,7 @@ public class Notifications {
     private User user;
     @ManyToOne
     @JoinColumn(name = "habit_id")
+    @JsonIgnore
     private Habits habits;
     private String message;
     @Column(name = "scheduled_at")

@@ -1,5 +1,6 @@
 package team1.TJFHabitTrackerBE.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -31,6 +32,7 @@ public class User  implements UserDetails{
     private Date createdAt;
     @Column(name = "updated_at")
     private Date updatedAt;
+    @JsonIgnore
     @ManyToMany(mappedBy = "users")
     private Set<Habits> habits = new HashSet<>();
 

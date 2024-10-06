@@ -1,5 +1,6 @@
 package team1.TJFHabitTrackerBE.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class HabitCompletion {
     @Id
     @GeneratedValue
     private UUID id;
-
+@JsonIgnore
     @ManyToOne
     @JoinColumn(name = "habit_id")
     private Habits habit;
