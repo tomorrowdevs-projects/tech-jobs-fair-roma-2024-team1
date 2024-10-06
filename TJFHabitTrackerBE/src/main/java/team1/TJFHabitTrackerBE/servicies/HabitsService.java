@@ -15,6 +15,7 @@ import team1.TJFHabitTrackerBE.repositories.HabitCompletionRepository;
 import team1.TJFHabitTrackerBE.repositories.HabitsRepository;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
 
+import javax.management.Notification;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +136,17 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
 
     public void deleteHabits(UUID id) {
         Habits found = this.findById(id);
+        // Ottieni le notifiche collegate a questa abitudine
+        List<Notifications> notifications = found.getNotifications();
+
+        // Se ci sono notifiche associate, cancellale
+        if (notifications != null && !notifications.isEmpty()) {
+            for (Notifications notification : notifications) {
+                notificationsRepository.delete(notification);
+            }
+        }
+
+
         this.habitsRepository.delete(found);
     }
 

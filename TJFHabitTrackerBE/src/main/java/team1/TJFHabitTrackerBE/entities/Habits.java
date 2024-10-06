@@ -53,6 +53,8 @@ public class Habits {
     @CollectionTable(name = "habit_dates", joinColumns = @JoinColumn(name = "habit_id"))
     @Column(name = "date")
     private List<LocalDateTime> frequencyDates = new ArrayList<>();
+    @OneToMany(mappedBy = "habits", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notifications> notifications;
     public Habits(String name, Frequency frequency, boolean reminder, LocalDateTime createdAt, LocalDateTime updatedAt, boolean completed, Category category, User owner) {
         this.name = name;
         this.frequency = frequency;
