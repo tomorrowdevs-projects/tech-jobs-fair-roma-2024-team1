@@ -11,7 +11,7 @@ import java.util.UUID;
 public record HabitsDTO(
         @NotEmpty (message = "Il campo name è obbligatorio")
         String name,
-        @NotEmpty (message = "Il campo frequency è obbligatorio")
+
         String frequency,
         boolean reminder,
         boolean completed,

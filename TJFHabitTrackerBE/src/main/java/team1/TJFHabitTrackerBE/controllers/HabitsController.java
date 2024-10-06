@@ -54,20 +54,11 @@ public Page<Habits> getHabits(
             throw new BadRequestException(validationResult.getAllErrors().toString());
         }
 
-        List<Habits> savedHabits;
+        // Salva l'abitudine utilizzando il metodo unificato
+        Habits savedHabit = this.habitsService.saveHabits(body, user.getId().toString());
 
-        // Se la frequenza è stata selezionata, crea più abitudini
-        if (body.frequency() != null && !body.frequency().isEmpty()) {
-            savedHabits = this.habitsService.saveHabitsByFrequency(body);
-        } else {
-            // Crea una singola abitudine
-            Habits singleHabit = this.habitsService.saveHabits(body, user.getId());
-            savedHabits = List.of(singleHabit);
-        }
-
-        return savedHabits.stream()
-                .map(habit -> new HabitsResponseDTO(habit.getId()))
-                .collect(Collectors.toList());
+        // Restituisce la risposta come lista di HabitsResponseDTO
+        return List.of(new HabitsResponseDTO(savedHabit.getId()));
     }
 // delete habit
     @DeleteMapping("/{habitsId}")
@@ -119,7 +110,7 @@ public Page<Habits> getHabits(
         }
         return habitsService.updateHabits(habitsId, body, user);
     }
- 
+
 
 
 

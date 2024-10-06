@@ -75,35 +75,61 @@ public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, St
         }
     }
 // save habit
-    public Habits saveHabits(HabitsDTO body, String currentUserId) {
-User currentUser = userService.findById(currentUserId);
-Category category = categoryService.findByName(body.category());
-
-        Habits habit = new Habits(
-                body.name(),
-                convertStringToFrequency(body.frequency()),
-                body.reminder(),
-                LocalDateTime.now(),
-                LocalDateTime.now(),
-                body.completed(),
-                category,
-                currentUser
-        );
-        // Aggiungi utenti condivisi
-        for (String userId : body.users()) {
-            if (!userId.equals(currentUserId)) { // Evita di aggiungere il creatore due volte
-                User user = userService.findById(userId);
-                habit.addUser(user);
-            }
-        }
-        Habits savedHabit = habitsRepository.save(habit);
-
-
-        // Pubblica un evento per notificare la creazione dell'abitudine
-        eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, currentUser));
-
-        return savedHabit;
+public Habits saveHabits(HabitsDTO body, String currentUserId) {
+    // Trova l'utente corrente
+    User currentUser = userService.findById(currentUserId);
+    if (currentUser == null) {
+        throw new NotFoundException("User not found with ID: " + currentUserId);
     }
+
+    // Trova la categoria
+    Category category = categoryService.findByName(body.category());
+    if (category == null) {
+        throw new NotFoundException("Category not found: " + body.category());
+    }
+
+    // Converti la stringa di frequenza in enum
+    Frequency frequency = null;
+    if (body.frequency() != null && !body.frequency().isEmpty()) {
+        frequency = convertStringToFrequency(body.frequency());
+    }
+
+    // Crea l'istanza di Habits
+    Habits habit = new Habits(
+            body.name(),
+            frequency,
+            body.reminder(),
+            LocalDateTime.now(),
+            LocalDateTime.now(),
+            body.completed(),
+            category,
+            currentUser
+    );
+
+    // Genera le date di frequenza basate sulla frequenza selezionata
+    if (frequency != null) {
+        generateFrequencyDates(habit, frequency);
+    }
+
+    // Aggiungi altri utenti come collaboratori
+    for (String userId : body.users()) {
+        if (!userId.equals(currentUserId)) { // Evita di aggiungere il creatore due volte
+            User user = userService.findById(userId);
+            if (user == null) {
+                throw new NotFoundException("User not found with ID: " + userId);
+            }
+            habit.addUser(user);
+        }
+    }
+
+    // Salva l'abitudine nel repository
+    Habits savedHabit = habitsRepository.save(habit);
+
+    // Pubblica un evento di creazione abitudine
+    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, currentUser));
+
+    return savedHabit;
+}
 
 
     public Habits findById(UUID id) {
@@ -142,120 +168,101 @@ Category category = categoryService.findByName(body.category());
 
 
     public Habits updateHabits(UUID id, HabitsDTO payload, User user) {
+        // Trova l'abitudine per ID
         Habits found = this.findById(id);
 
+        // Verifica se l'utente è il proprietario dell'abitudine
         if (!found.getOwner().getId().equals(user.getId())) {
             throw new NotFoundException("You are not authorized to modify this habit.");
         }
 
-        found.setName(payload.name());
-        found.setFrequency(convertStringToFrequency(payload.frequency()));
-        found.setUpdatedAt(LocalDateTime.now());
+        // Aggiorna il nome dell'abitudine
+        if (payload.name() != null && !payload.name().trim().isEmpty()) {
+            found.setName(payload.name());
+        }
 
-        if (payload.category() != null) {
+        // Aggiorna la frequenza se fornita
+        if (payload.frequency() != null && !payload.frequency().isEmpty()) {
+            Frequency newFrequency = convertStringToFrequency(payload.frequency());
+
+            // Se la frequenza è cambiata, aggiorna la lista di frequencyDates
+            if (!newFrequency.equals(found.getFrequency())) {
+                found.setFrequency(newFrequency);
+                found.getFrequencyDates().clear(); // Pulisci le date esistenti
+                generateFrequencyDates(found, newFrequency); // Rigenera le date basate sulla nuova frequenza
+            }
+        }
+
+        // Aggiorna il reminder
+        found.setReminder(payload.reminder());
+
+        // Aggiorna il completato
+        found.setCompleted(payload.completed());
+
+        // Aggiorna la categoria se fornita
+        if (payload.category() != null && !payload.category().trim().isEmpty()) {
             Category category = categoryService.findByName(payload.category());
+            if (category == null) {
+                throw new NotFoundException("Category not found: " + payload.category());
+            }
             found.setCategory(category);
         }
 
-        Habits updatedHabit = habitsRepository.save(found);
-        // Pubblica un evento per notificare l'aggiornamento dell'abitudine
-        eventPublisher.publishEvent(new HabitCreatedEvent(this, updatedHabit, user));
+        // Aggiorna gli utenti condivisi, se necessario
+        if (payload.users() != null && !payload.users().isEmpty()) {
+            // Rimuovi tutti gli utenti attuali tranne il proprietario
+            found.getUsers().removeIf(u -> !u.getId().equals(user.getId()));
 
-        return updatedHabit;
-    }
-
-
-    public List<Habits> saveHabitsByFrequency(HabitsDTO body) {
-        List<Habits> createdHabits = new ArrayList<>();
-        for (int i = 0; i < body.users().size(); i++) {
-
-        User found = this.userService.findById(body.users().get(i));
-            if (found == null) {
-                throw new NotFoundException("User not found with ID: " + body.users().get(i));
+            // Aggiungi gli utenti forniti nel payload
+            for (String userId : payload.users()) {
+                if (!userId.equals(user.getId().toString())) { // Evita di aggiungere il proprietario di nuovo
+                    User additionalUser = userService.findById(userId);
+                    if (additionalUser == null) {
+                        throw new NotFoundException("User not found with ID: " + userId);
+                    }
+                    found.addUser(additionalUser);
+                }
             }
-         Frequency frequency = convertStringToFrequency(body.frequency());
-        switch (frequency) {
-            case EVERYDAY:
-                for (int j = 0; j < 7; j++) { // Crea 7 abitudini giornaliere
-                    Habits habit = new Habits(
-                            body.name(),
-                            frequency,
-                            body.reminder(),
-                            LocalDateTime.now().plusDays(j),
-                            LocalDateTime.now(),
-                            body.completed(),
-                            categoryService.findByName(body.category()),
-                            found
-                    );
-                    Habits savedHabit = habitsRepository.save(habit);
-                    createdHabits.add(savedHabit);
-                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
-                }
-                break;
-            case EVERY3DAYS:
-                for (int j = 0; j < 4; j++) { // Crea 4 abitudini ogni 3 giorni
-                    Habits habit = new Habits(
-                            body.name(),
-                            frequency,
-                            body.reminder(),
-                            LocalDateTime.now().plusDays(j * 3),
-                           LocalDateTime.now(),
-                            body.completed(),
-                            categoryService.findByName(body.category()),
-                            found
-                    );
-                    Habits savedHabit = habitsRepository.save(habit);
-                    createdHabits.add(savedHabit);
-                    // Pubblica un evento per ogni abitudine creata
-                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
-
-                }
-                break;
-            case ONCEAWEEK:
-                for (int j = 0; j < 12; j++) { // Crea 12 abitudini settimanali
-                    Habits habit = new Habits(
-                            body.name(),
-                            frequency,
-                            body.reminder(),
-                            LocalDateTime.now().plusWeeks(j),
-                            LocalDateTime.now(),
-                            body.completed(),
-                            categoryService.findByName(body.category()),
-                            found
-                    );
-                    Habits savedHabit = habitsRepository.save(habit);
-                    createdHabits.add(savedHabit);
-                    // Pubblica un evento per ogni abitudine creata
-                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
-                }
-                break;
-            case ONCEAMONTH:
-                for (int j = 0; j < 12; j++) { // Crea 12 abitudini mensili
-                    Habits habit = new Habits(
-                            body.name(),
-                            frequency,
-                            body.reminder(),
-                            LocalDateTime.now().plusMonths(j),
-                           LocalDateTime.now(),
-                            body.completed(),
-                            categoryService.findByName(body.category()),
-                            found
-                    );
-                    Habits savedHabit = habitsRepository.save(habit);
-                    createdHabits.add(savedHabit);
-                    // Pubblica un evento per ogni abitudine creata
-                    eventPublisher.publishEvent(new HabitCreatedEvent(this, savedHabit, found));
-                }
-                break;
-            default:
-                throw new BadRequestException("Unsupported frequency type");
-        }
         }
 
-        // Logica per creare abitudini basate sulla frequenza
+        // Aggiorna la data di aggiornamento
+        found.setUpdatedAt(LocalDateTime.now());
 
-        return createdHabits;
+
+
+
+        return habitsRepository.save(found);
     }
+
+// creazione date per frequenza
+private void generateFrequencyDates(Habits habit, Frequency frequency) {
+    LocalDateTime now = LocalDateTime.now();
+    switch (frequency) {
+        case EVERYDAY:
+            for (int i = 0; i < 7; i++) { // 7 giorni
+                habit.getFrequencyDates().add(now.plusDays(i));
+            }
+            break;
+        case EVERY3DAYS:
+            for (int i = 0; i < 4; i++) { // Ogni 3 giorni, 4 occorrenze
+                habit.getFrequencyDates().add(now.plusDays(i * 3));
+            }
+            break;
+        case ONCEAWEEK:
+            for (int i = 0; i < 12; i++) { // 12 settimane
+                habit.getFrequencyDates().add(now.plusWeeks(i));
+            }
+            break;
+        case ONCEAMONTH:
+            for (int i = 0; i < 12; i++) { // 12 mesi
+                habit.getFrequencyDates().add(now.plusMonths(i));
+            }
+            break;
+        default:
+            throw new BadRequestException("Unsupported frequency type");
+    }
+}
+
 
 
 }

@@ -48,7 +48,11 @@ public class Habits {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User owner;
-
+    // Aggiungi la lista di date di frequenza
+    @ElementCollection
+    @CollectionTable(name = "habit_dates", joinColumns = @JoinColumn(name = "habit_id"))
+    @Column(name = "date")
+    private List<LocalDateTime> frequencyDates = new ArrayList<>();
     public Habits(String name, Frequency frequency, boolean reminder, LocalDateTime createdAt, LocalDateTime updatedAt, boolean completed, Category category, User owner) {
         this.name = name;
         this.frequency = frequency;
