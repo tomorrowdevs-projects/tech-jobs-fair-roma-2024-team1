@@ -71,7 +71,11 @@ public Page<Habits> getHabits(
 
 
     @PatchMapping("/{habitsId}/complete")
-    public HabitCompletionResponseDTO completeHabit(@PathVariable UUID habitsId, @AuthenticationPrincipal User user) {
+    public HabitCompletionResponseDTO completeHabit(@PathVariable UUID habitsId, @AuthenticationPrincipal User user, BindingResult validationResult) {
+    if(validationResult.hasErrors()){
+        System.out.println(validationResult.getAllErrors());
+        throw new BadRequestException(validationResult.getAllErrors());
+    }
         HabitCompletion completion = habitsService.completeHabit(habitsId, user);
         return new HabitCompletionResponseDTO(completion.getId(), completion.getCompletedAt());
 
