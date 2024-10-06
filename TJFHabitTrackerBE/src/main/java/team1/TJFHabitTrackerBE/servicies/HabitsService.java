@@ -112,15 +112,7 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
     }
 
     // Aggiungi altri utenti come collaboratori
-    for (String userId : body.users()) {
-        if (!userId.equals(currentUserId)) { // Evita di aggiungere il creatore due volte
-            User user = userService.findById(userId);
-            if (user == null) {
-                throw new NotFoundException("User not found with ID: " + userId);
-            }
-            habit.addUser(user);
-        }
-    }
+
 
     // Salva l'abitudine nel repository
     Habits savedHabit = habitsRepository.save(habit);
@@ -208,22 +200,7 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
             found.setCategory(category);
         }
 
-        // Aggiorna gli utenti condivisi, se necessario
-        if (payload.users() != null && !payload.users().isEmpty()) {
-            // Rimuovi tutti gli utenti attuali tranne il proprietario
-            found.getUsers().removeIf(u -> !u.getId().equals(user.getId()));
 
-            // Aggiungi gli utenti forniti nel payload
-            for (String userId : payload.users()) {
-                if (!userId.equals(user.getId().toString())) { // Evita di aggiungere il proprietario di nuovo
-                    User additionalUser = userService.findById(userId);
-                    if (additionalUser == null) {
-                        throw new NotFoundException("User not found with ID: " + userId);
-                    }
-                    found.addUser(additionalUser);
-                }
-            }
-        }
 
         // Aggiorna la data di aggiornamento
         found.setUpdatedAt(LocalDateTime.now());
