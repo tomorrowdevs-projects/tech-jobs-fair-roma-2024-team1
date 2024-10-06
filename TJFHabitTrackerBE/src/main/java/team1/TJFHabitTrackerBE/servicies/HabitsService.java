@@ -121,7 +121,7 @@ Category category = categoryService.findByName(body.category());
 
     public HabitCompletion completeHabit(UUID habitId, User user) {
        Habits habit = findById(habitId);
-        if (!habit.getUsers().contains(user)) {
+        if (!habit.getUsers().contains(user) || !habit.getOwner().equals(user)) {
             throw new NotFoundException("You are not authorized to complete this habit.");
         }
         HabitCompletion completion = new HabitCompletion(habit, user, LocalDateTime.now());
