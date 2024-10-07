@@ -84,12 +84,8 @@ public Page<Habits> getHabits(
 
 
     @PatchMapping("/{habitsId}/complete")
-    public   ResponseEntity<?>  completeHabit(@PathVariable UUID habitsId, @AuthenticationPrincipal User user, BindingResult validationResult) {
+    public   ResponseEntity<?>  completeHabit(@PathVariable UUID habitsId, @AuthenticationPrincipal User user) {
         try {
-            if (validationResult.hasErrors()) {
-                throw new BadRequestException(validationResult.getAllErrors());
-            }
-
             // Chiama il servizio per completare l'abitudine
             HabitCompletion completion = habitsService.completeHabit(habitsId, user);
 
@@ -98,7 +94,7 @@ public Page<Habits> getHabits(
             return ResponseEntity.ok(response);
 
         } catch (BadRequestException e) {
-            // Restituisce una stringa in caso di errore di validazione
+            // Restituisce una stringa in caso di errore specifico
             return ResponseEntity.badRequest().body("Errore nella richiesta: " + e.getMessage());
 
         } catch (Exception e) {
