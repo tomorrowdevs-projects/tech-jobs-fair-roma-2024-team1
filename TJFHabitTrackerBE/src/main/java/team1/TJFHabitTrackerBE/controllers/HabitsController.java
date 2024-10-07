@@ -1,7 +1,10 @@
 package team1.TJFHabitTrackerBE.controllers;
 
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -19,6 +22,7 @@ import team1.TJFHabitTrackerBE.payload.UsersDTO.UserDTO;
 import team1.TJFHabitTrackerBE.security.JwtTool;
 import team1.TJFHabitTrackerBE.servicies.HabitsService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -44,6 +48,7 @@ public Page<Habits> getHabits(
 
     return this.habitsService.getAllHabits(page, size, sortBy, userId);
 }
+
 
 
     // post habits
@@ -79,13 +84,27 @@ public Page<Habits> getHabits(
 
 
     @PatchMapping("/{habitsId}/complete")
-    public HabitCompletionResponseDTO completeHabit(@PathVariable UUID habitsId, @AuthenticationPrincipal User user, BindingResult validationResult) {
-    if(validationResult.hasErrors()){
-        System.out.println(validationResult.getAllErrors());
-        throw new BadRequestException(validationResult.getAllErrors());
-    }
-        HabitCompletion completion = habitsService.completeHabit(habitsId, user);
-        return new HabitCompletionResponseDTO(completion.getId(), completion.getCompletedAt());
+    public   ResponseEntity<?>  completeHabit(@PathVariable UUID habitsId, @AuthenticationPrincipal User user, BindingResult validationResult) {
+        try {
+            if (validationResult.hasErrors()) {
+                throw new BadRequestException(validationResult.getAllErrors());
+            }
+
+            // Chiama il servizio per completare l'abitudine
+            HabitCompletion completion = habitsService.completeHabit(habitsId, user);
+
+            // Restituisce il DTO in caso di successo
+            HabitCompletionResponseDTO response = new HabitCompletionResponseDTO(completion.getId(), completion.getCompletedAt());
+            return ResponseEntity.ok(response);
+
+        } catch (BadRequestException e) {
+            // Restituisce una stringa in caso di errore di validazione
+            return ResponseEntity.badRequest().body("Errore nella richiesta: " + e.getMessage());
+
+        } catch (Exception e) {
+            // Restituisce una stringa con un messaggio di errore generico in caso di errore del server
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ops... abbiamo sbagliato qualcosa...");
+        }
 
     }
 
