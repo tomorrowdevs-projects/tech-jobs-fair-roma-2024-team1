@@ -24,7 +24,7 @@ public class HabitCompletion {
     @ManyToOne
     @JoinColumn(name = "habit_id")
     private Habits habit;
-
+@JsonIgnore
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
