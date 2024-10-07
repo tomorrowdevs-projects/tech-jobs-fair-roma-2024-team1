@@ -23,6 +23,9 @@ public interface HabitsRepository extends JpaRepository<Habits, UUID> {
     Page<Habits> findByUsers_IdAndCompleted(String userId, boolean completed, Pageable pageable);
 
     // Abitudini proprietarie o condivise e completate
-    @Query("SELECT h FROM Habits h JOIN h.users u WHERE h.owner.id = :userId OR u.id = :userId AND h.completed = :completed")
+    @Query("SELECT h FROM Habits h LEFT JOIN h.users u WHERE (h.owner.id = :userId OR u.id = :userId) AND h.completed = :completed")
     Page<Habits> findByOwnerIdOrUsers_IdAndCompleted(@Param("userId") String userId, @Param("completed") boolean completed, Pageable pageable);
+    // Abitutudini proprietarie o condivise non filtrate
+    @Query("SELECT h FROM Habits h LEFT JOIN h.users u WHERE h.owner.id = :userId OR u.id = :userId")
+    Page<Habits> findByOwnerIdOrUsers_Id(@Param("userId") String userId, Pageable pageable);
 }

@@ -44,26 +44,28 @@ public class HabitsService {
     private ApplicationEventPublisher eventPublisher;
 @Autowired
 private  NotificationService notificationService;
-// get all habit
-public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
+// get all habit completed
+public Page<Habits> getAllHabitsNotCompleted(int pageNumber, int pageSize, String sortBy, String userId) {
+
 
 
 
     if (pageSize > 20) pageSize = 20;
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy).descending());
 
-    // Recupera abitudini proprietarie
-    Page<Habits> ownedHabits = habitsRepository.findByOwnerIdAndCompleted(userId, false, pageable);
+    // Recupera abitudini non completate, proprietarie o condivise
 
-    // Recupera abitudini condivise
-    Page<Habits> sharedHabits = habitsRepository.findByUsers_IdAndCompleted(userId, false, pageable);
+    return habitsRepository.findByOwnerIdOrUsers_IdAndCompleted(userId, false, pageable);
+}
+//get all habit
+public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
 
+    if (pageSize > 20) pageSize = 20;
+    Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy).descending());
 
-    List<Habits> combinedList = new ArrayList<>();
-    combinedList.addAll(ownedHabits.getContent());
-    combinedList.addAll(sharedHabits.getContent());
+    // Recupera tutte le abitudini (completate e non completate)
 
-    return new PageImpl<>(combinedList, pageable, ownedHabits.getTotalElements() + sharedHabits.getTotalElements());
+    return habitsRepository.findByOwnerIdOrUsers_Id(userId, pageable);
 }
     //    METODO DI CONVERSIONE DA STRINGA A ENUM (FREQUENCY)
     private static Frequency convertStringToFrequency (String resType){
@@ -208,7 +210,10 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
         }
 
         // Aggiorna il completato
-        found.setCompleted(payload.completed());
+        if(payload.completed()){
+
+        found.setCompleted(true);
+        }
 
         // Aggiorna la categoria se fornita
         if (payload.category() != null && !payload.category().trim().isEmpty()) {
