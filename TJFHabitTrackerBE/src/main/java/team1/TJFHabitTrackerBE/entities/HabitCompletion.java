@@ -20,7 +20,7 @@ public class HabitCompletion {
     @Id
     @GeneratedValue
     private UUID id;
-@JsonIgnore
+
     @ManyToOne
     @JoinColumn(name = "habit_id")
     private Habits habit;
