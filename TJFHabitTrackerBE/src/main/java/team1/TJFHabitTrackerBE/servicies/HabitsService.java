@@ -16,10 +16,10 @@ import team1.TJFHabitTrackerBE.repositories.HabitsRepository;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
 
 import javax.management.Notification;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -62,11 +62,34 @@ public Page<Habits> getAllHabitsNotCompleted(int pageNumber, int pageSize, Strin
 public Page<Habits> getAllHabits(int pageNumber, int pageSize, String sortBy, String userId) {
 
     if (pageSize > 20) pageSize = 20;
+
+    // Crea l'oggetto Pageable con la paginazione e l'ordinamento
     Pageable pageable = PageRequest.of(pageNumber, pageSize, Sort.by(sortBy).descending());
 
-    // Recupera tutte le abitudini (completate e non completate)
+    // Recupera tutte le abitudini dell'utente
+    Page<Habits> habitsPage = habitsRepository.findByOwnerIdOrUsers_Id(userId, pageable);
 
-    return habitsRepository.findByOwnerIdOrUsers_Id(userId, pageable);
+    // Ottieni la data corrente (senza l'ora) per il confronto
+    LocalDate today = LocalDate.now();
+
+    // Itera attraverso tutte le abitudini
+    for (Habits habit : habitsPage) {
+        // Verifica se l'abitudine ha completamenti per oggi
+        boolean hasCompletionToday = habit.getHabitCompletions().stream()
+                .anyMatch(completion -> completion.getCompletedAt().toLocalDate().equals(today));
+
+        // Se non c'è un completamento per oggi, imposta completed su false
+        if (!hasCompletionToday) {
+            habit.setCompleted(false);
+        }
+        // Se esiste un completamento per oggi, lascia completed su true
+    }
+
+    // Salva le abitudini con lo stato aggiornato (se necessario)
+    habitsRepository.saveAll(habitsPage);
+
+    // Ritorna le abitudini con la paginazione
+    return habitsPage;
 }
     //    METODO DI CONVERSIONE DA STRINGA A ENUM (FREQUENCY)
     private static Frequency convertStringToFrequency (String resType){
@@ -157,31 +180,14 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
 // completa abitudine
 
     public HabitCompletion completeHabit(UUID habitId, User user) {
-        Habits habit = findById(habitId);
-        LocalDateTime now = LocalDateTime.now();
+       Habits habit = findById(habitId);
 
-        // Verifica se l'abitudine è già completata
-        if (habit.isCompleted()) {
-            // Controlla se ci sono completamenti esistenti per questa abitudine
-            Optional<HabitCompletion> existingCompletion = habit.getHabitCompletions().stream()
-                    .filter(completion -> completion.getCompletedAt().toLocalDate().isEqual(now.toLocalDate()))
-                    .findFirst();
-
-            if (existingCompletion.isPresent()) {
-                // Se esiste già un completamento per oggi, non fare nulla
-                return existingCompletion.get();
-            } else {
-                // Se non esiste un completamento, considerala come completata di nuovo per oggi
-                habit.setCompleted(false); // oppure gestisci in un altro modo
-            }
-        }
-
-        // Crea una nuova istanza di completamento
-        HabitCompletion completion = new HabitCompletion(habit, user, now);
-        habitCompletionRepository.save(completion);
+        HabitCompletion completion = new HabitCompletion(habit, user, LocalDateTime.now());
+       habitCompletionRepository.save(completion);
         habit.addCompletion(completion);
+        habitsRepository.save(habit);
 
-        // Imposta l'abitudine come completata per oggi
+        // Aggiorna lo stato completato se necessario
         habit.setCompleted(true);
         habitsRepository.save(habit);
 
