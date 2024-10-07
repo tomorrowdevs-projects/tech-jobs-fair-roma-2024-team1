@@ -19,6 +19,7 @@ import javax.management.Notification;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -156,14 +157,31 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
 // completa abitudine
 
     public HabitCompletion completeHabit(UUID habitId, User user) {
-       Habits habit = findById(habitId);
+        Habits habit = findById(habitId);
+        LocalDateTime now = LocalDateTime.now();
 
-        HabitCompletion completion = new HabitCompletion(habit, user, LocalDateTime.now());
-       habitCompletionRepository.save(completion);
+        // Verifica se l'abitudine è già completata
+        if (habit.isCompleted()) {
+            // Controlla se ci sono completamenti esistenti per questa abitudine
+            Optional<HabitCompletion> existingCompletion = habit.getHabitCompletions().stream()
+                    .filter(completion -> completion.getCompletedAt().toLocalDate().isEqual(now.toLocalDate()))
+                    .findFirst();
+
+            if (existingCompletion.isPresent()) {
+                // Se esiste già un completamento per oggi, non fare nulla
+                return existingCompletion.get();
+            } else {
+                // Se non esiste un completamento, considerala come completata di nuovo per oggi
+                habit.setCompleted(false); // oppure gestisci in un altro modo
+            }
+        }
+
+        // Crea una nuova istanza di completamento
+        HabitCompletion completion = new HabitCompletion(habit, user, now);
+        habitCompletionRepository.save(completion);
         habit.addCompletion(completion);
-        habitsRepository.save(habit);
 
-        // Aggiorna lo stato completato se necessario
+        // Imposta l'abitudine come completata per oggi
         habit.setCompleted(true);
         habitsRepository.save(habit);
 
