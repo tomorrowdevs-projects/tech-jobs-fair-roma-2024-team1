@@ -18,6 +18,7 @@ import team1.TJFHabitTrackerBE.exceptions.UnauthorizedException;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitCompletionResponseDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsResponseDTO;
+import team1.TJFHabitTrackerBE.payload.HabitsDTO.ShareHabitDTO;
 import team1.TJFHabitTrackerBE.payload.UsersDTO.UserDTO;
 import team1.TJFHabitTrackerBE.security.JwtTool;
 import team1.TJFHabitTrackerBE.servicies.HabitsService;
@@ -134,21 +135,19 @@ public Page<Habits> getHabits(
 
 // share habit
 @PostMapping("/{habitsId}/share")
-public void shareHabit(
+public Habits shareHabit(
         @PathVariable UUID habitsId,
-        @RequestBody List<String> userIds,
+        @RequestBody ShareHabitDTO body,
         @AuthenticationPrincipal User currentUser) {
+
+    // Verifica se l'abitudine appartiene all'utente corrente
     Habits habit = habitsService.findById(habitsId);
     if (!habit.getOwner().getId().equals(currentUser.getId())) {
         throw new NotFoundException("You are not authorized to share this habit.");
     }
 
-    for (String userId : userIds) {
-        User user = habitsService.getUserService().findById(userId);
-        habit.addUser(user);
-    }
 
-    habitsService.findById(habitsId); // Salva automaticamente tramite il repository
+ return   habitsService.shareHabits(habitsId, currentUser.getId(), body);
 }
     @GetMapping("/{habitsId}/shared-with")
     public List<UserDTO> getSharedUsers(

@@ -11,6 +11,7 @@ import team1.TJFHabitTrackerBE.enums.Frequency;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
 import team1.TJFHabitTrackerBE.exceptions.NotFoundException;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
+import team1.TJFHabitTrackerBE.payload.HabitsDTO.ShareHabitDTO;
 import team1.TJFHabitTrackerBE.repositories.HabitCompletionRepository;
 import team1.TJFHabitTrackerBE.repositories.HabitsRepository;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
@@ -20,6 +21,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -288,6 +290,24 @@ private void generateFrequencyDates(Habits habit, Frequency frequency) {
     }
 }
 
+// condividere abitudine
+public Habits shareHabits(UUID habitId, String currentUserId, ShareHabitDTO shareHabitDTO) {
+    User user = userService.findById(currentUserId);
+    User userToShare = userService.findByEmail(shareHabitDTO.email());
 
+    Optional<Habits> habit = user.getHabits().stream()
+            .filter(habit1 -> habit1.getId().equals(habitId))
+            .findFirst();
+
+    if (habit.isPresent()) {
+        Habits foundHabit = habit.get();
+        foundHabit.getUsers().add(userToShare); // Aggiungi l'utente con cui condividere l'abitudine
+        habitsRepository.save(foundHabit); // Salva l'abitudine aggiornata nel repository
+        return foundHabit; // Restituisci l'abitudine trovata e aggiornata
+    } else {
+        // Gestisci il caso in cui l'abitudine non sia stata trovata
+        throw new IllegalArgumentException("Habit not found for id: " + habitId);
+    }
+}
 
 }
