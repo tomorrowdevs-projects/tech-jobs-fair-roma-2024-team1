@@ -19,10 +19,7 @@ import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
 import javax.management.Notification;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class HabitsService {
@@ -141,7 +138,7 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
         generateFrequencyDates(habit, frequency);
     }
 
-    // Aggiungi altri utenti come collaboratori
+
 
 
     // Salva l'abitudine nel repository
@@ -161,21 +158,50 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
         return this.habitsRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
     }
 
+    //delete condizionato
 
-    public void deleteHabits(UUID id) {
+    public void deleteHabits(UUID id, String userId) {
+        // Find the habit by ID
         Habits found = this.findById(id);
-        // Ottieni le notifiche collegate a questa abitudine
+
+        // Check if the habit was found
+        if (found == null) {
+            throw new BadRequestException("Habit not found.");
+        }
+
+        // Get notifications associated with the habit
         List<Notifications> notifications = found.getNotifications();
 
-        // Se ci sono notifiche associate, cancellale
+        // Delete associated notifications if they exist
         if (notifications != null && !notifications.isEmpty()) {
             for (Notifications notification : notifications) {
                 notificationsRepository.delete(notification);
             }
         }
 
+        // Get the list of users linked to the habit
+        List<User> userList = new ArrayList<>(found.getUsers().stream().toList());
 
-        this.habitsRepository.delete(found);
+        // Remove the user from the habit's user list
+        boolean removed = userList.removeIf(user -> user.getId().equals(userId));
+if(userId.equals(found.getOwner().getId())){
+    found.setOwner(null);
+    habitsRepository.save(found);
+}
+        // Check if the user was found and removed
+        if (!removed) {
+            throw new BadRequestException("User not found in the habit.");
+        }
+
+        // If no users are left, delete the habit
+        if (userList.isEmpty()) {
+            this.habitsRepository.delete(found);
+        } else {
+            // If there are remaining users, update the habit's user list
+            found.setUsers((Set<User>) userList);
+            this.habitsRepository.save(found);
+        }
+
     }
 
 
@@ -264,19 +290,20 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
 // creazione date per frequenza
 private void generateFrequencyDates(Habits habit, Frequency frequency) {
     LocalDateTime now = LocalDateTime.now();
+    // il calcolo viene fatto in base a un anno
     switch (frequency) {
         case EVERYDAY:
-            for (int i = 0; i < 7; i++) { // 7 giorni
+            for (int i = 0; i < 30; i++) { // everyday viene rapportato in un mese
                 habit.getFrequencyDates().add(now.plusDays(i));
             }
             break;
         case EVERY3DAYS:
-            for (int i = 0; i < 4; i++) { // Ogni 3 giorni, 4 occorrenze
+            for (int i = 0; i < 10; i++) { // anche every 3 days
                 habit.getFrequencyDates().add(now.plusDays(i * 3));
             }
             break;
         case ONCEAWEEK:
-            for (int i = 0; i < 12; i++) { // 12 settimane
+            for (int i = 0; i < 4; i++) { //  Circa 4 settimane in un mese
                 habit.getFrequencyDates().add(now.plusWeeks(i));
             }
             break;

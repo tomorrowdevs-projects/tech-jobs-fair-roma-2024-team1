@@ -7,6 +7,8 @@ import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBr
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -21,9 +23,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        // Endpoint per stabilire la connessione WebSocket
         registry.addEndpoint("/ws-notifications")
-                .setAllowedOrigins("*") // Specifica gli origin se necessario per la sicurezza
-                .withSockJS(); // Fallback per browser che non supportano WebSocket
+                .setAllowedOrigins(String.valueOf(Arrays.asList("http://localhost:5173/", "https://ritmogiornaliero.netlify.app/")))
+                .withSockJS();
     }
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import team1.TJFHabitTrackerBE.entities.Habits;
 import team1.TJFHabitTrackerBE.entities.Notifications;
 import team1.TJFHabitTrackerBE.entities.User;
+import team1.TJFHabitTrackerBE.enums.Frequency;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsDTO;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
@@ -77,7 +78,46 @@ public class NotificationService {
             sendNotification(savedNotification);
         }
     }
+/**Creazione notifica per ogni data frequenza */
+private void generateFrequencyDates(Habits habit, Frequency frequency) {
+    LocalDateTime now = LocalDateTime.now();
 
+    switch (frequency) {
+        case EVERYDAY:
+            for (int i = 0; i < 30; i++) { // circa 30 giorni
+                habit.getFrequencyDates().add(now.plusDays(i));
+                for (User user : habit.getUsers()){
+                createNotificationIfReminder(habit, user);
+                }
+            }
+            break;
+        case EVERY3DAYS:
+            for (int i = 0; i < 10; i++) { // circa 10 occorrenze (30 / 3)
+                habit.getFrequencyDates().add(now.plusDays(i * 3));
+                for (User user : habit.getUsers()){
+                    createNotificationIfReminder(habit, user);
+                }
+            }
+            break;
+        case ONCEAWEEK:
+            for (int i = 0; i < 4; i++) { // circa 4 settimane in un mese
+                habit.getFrequencyDates().add(now.plusWeeks(i));
+                for (User user : habit.getUsers()){
+                    createNotificationIfReminder(habit, user);
+                }
+            }
+            break;
+        case ONCEAMONTH:
+            for (int i = 0; i < 12; i++) {
+            habit.getFrequencyDates().add(now.withDayOfMonth(1)); // Aggiungi 1 per mese
+
+                for (User user : habit.getUsers()){
+                    createNotificationIfReminder(habit, user);
+                }
+            }
+            break;
+    }
+}
     /**
      * Invia una notifica tramite WebSocket.
      */
@@ -88,6 +128,7 @@ public class NotificationService {
         notification.setSentAt(LocalDateTime.now());
         notificationsRepository.save(notification);
     }
+
 
     /**
      * Ascolta gli eventi di creazione dell'abitudine e crea notifiche.

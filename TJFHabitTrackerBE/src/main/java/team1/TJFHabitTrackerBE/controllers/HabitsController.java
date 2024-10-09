@@ -77,7 +77,7 @@ public Page<Habits> getHabits(
             throw new UnauthorizedException("You are not authorized to delete this habit.");
         }
 
-        habitsService.deleteHabits(habitsId);
+        habitsService.deleteHabits(habitsId, user.getId());
 
     }
 
