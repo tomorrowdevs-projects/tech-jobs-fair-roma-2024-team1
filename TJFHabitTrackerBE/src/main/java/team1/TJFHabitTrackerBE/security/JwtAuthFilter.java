@@ -2,6 +2,7 @@ package team1.TJFHabitTrackerBE.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -28,10 +29,25 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) throw new UnauthorizedException("Per favore inserisci correttamente il token nell'header");
+        String accessToken = null;
 
+        // Controlla prima nell'header Authorization
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            accessToken = authHeader.substring(7);
+        }
+        // Se non c'è, controlla nel cookie
+        else if (request.getCookies() != null) {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("token")) {
+                    accessToken = cookie.getValue();
+                    break;
+                }
+            }
+        }
 
-        String accessToken = authHeader.substring(7);
+        if (accessToken == null) {
+            throw new UnauthorizedException("Per favore inserisci correttamente il token nell'header o nel cookie");
+        }
 
         jwtTools.verifyToken(accessToken);
         String userId = jwtTools.extractIdFromToken(accessToken);
@@ -40,7 +56,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
         filterChain.doFilter(request, response);
-
     }
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {

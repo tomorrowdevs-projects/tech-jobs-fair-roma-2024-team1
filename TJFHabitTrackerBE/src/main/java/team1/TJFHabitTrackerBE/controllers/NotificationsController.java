@@ -4,10 +4,14 @@ package team1.TJFHabitTrackerBE.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import reactor.core.publisher.Flux;
 import team1.TJFHabitTrackerBE.entities.Notifications;
 import team1.TJFHabitTrackerBE.entities.User;
@@ -16,13 +20,17 @@ import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsResponseDTO;
 import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsDTO;
 import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsResponseDTO;
+import team1.TJFHabitTrackerBE.security.JwtTool;
 import team1.TJFHabitTrackerBE.servicies.NotificationService;
+import team1.TJFHabitTrackerBE.servicies.UserService;
 
 @RestController
 @RequestMapping("/notifications")
 public class NotificationsController {
     @Autowired
     private NotificationService notificationService;
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     public Page<Notifications> getNotifications(
@@ -47,8 +55,18 @@ public class NotificationsController {
         return new NotificationsResponseDTO(savedNotification.getId());
     }
     // Endpoint per inviare notifiche in real-time tramite SSE
-    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<Notifications> streamNotifications(@AuthenticationPrincipal User user) {
-        return this.notificationService.getNotificationsStream(user.getId());
+    @GetMapping("/sse")
+    public SseEmitter handleSse(@RequestParam("token") String token) {
+        JwtTool jwtTools = null;
+        jwtTools.verifyToken(token);
+        String userId = jwtTools.extractIdFromToken(token);
+        User currentUser = userService.findById(userId);
+        // Setta l'utente autenticato nel SecurityContext se necessario
+        Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        // Ritorna l'oggetto SSE
+        // Invia notifiche con emitter.send(notification);
+        return new SseEmitter();
     }
 }
