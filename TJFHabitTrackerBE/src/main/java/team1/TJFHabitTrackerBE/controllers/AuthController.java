@@ -1,5 +1,6 @@
 package team1.TJFHabitTrackerBE.controllers;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.BindingResult;
@@ -20,12 +21,12 @@ public class AuthController {
 
     @PostMapping("/saveUser")
     @ResponseStatus(HttpStatus.CREATED)
-    public UserResponseDTO saveUser(@RequestBody @Validated UserDTO body, BindingResult validationResult) {
+    public UserResponseDTO saveUser(@RequestBody @Validated UserDTO body, BindingResult validationResult, HttpServletResponse response) {
         if (validationResult.hasErrors()) {
             System.out.println(validationResult.getAllErrors());
             throw new BadRequestException(validationResult.getAllErrors());
         }
 
-        return new UserResponseDTO(this.userService.saveUser(body));
+        return new UserResponseDTO(this.userService.saveUserAndSetCookie(body, response));
     }
 }

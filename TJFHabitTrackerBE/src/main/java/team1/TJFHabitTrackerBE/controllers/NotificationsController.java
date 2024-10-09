@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import team1.TJFHabitTrackerBE.entities.Notifications;
 import team1.TJFHabitTrackerBE.entities.User;
 import team1.TJFHabitTrackerBE.exceptions.BadRequestException;
+import team1.TJFHabitTrackerBE.exceptions.UnauthorizedException;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsResponseDTO;
 import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsDTO;
@@ -37,15 +38,15 @@ public class NotificationsController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(defaultValue = "id") String sortBy,
-    @AuthenticationPrincipal User user) {
+            @AuthenticationPrincipal User user) {
 
-        return this.notificationService.getAllNotifications(user.getId(), page,size, sortBy);
+        return this.notificationService.getAllNotifications(user.getId(), page, size, sortBy);
     }
 
     @PostMapping
     public NotificationsResponseDTO saveNotifications(
             @RequestBody @Validated NotificationsDTO body,
-            BindingResult validationResult){
+            BindingResult validationResult) {
         if (validationResult.hasErrors()) {
             System.out.println(validationResult.getAllErrors());
             throw new BadRequestException(validationResult.getAllErrors().toString());
@@ -54,19 +55,18 @@ public class NotificationsController {
         Notifications savedNotification = this.notificationService.saveNotifications(body);
         return new NotificationsResponseDTO(savedNotification.getId());
     }
-    // Endpoint per inviare notifiche in real-time tramite SSE
-    @GetMapping("/sse")
-    public SseEmitter handleSse(@RequestParam("token") String token) {
-        JwtTool jwtTools = null;
-        jwtTools.verifyToken(token);
-        String userId = jwtTools.extractIdFromToken(token);
-        User currentUser = userService.findById(userId);
-        // Setta l'utente autenticato nel SecurityContext se necessario
-        Authentication authentication = new UsernamePasswordAuthenticationToken(currentUser, null, currentUser.getAuthorities());
-        SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Ritorna l'oggetto SSE
-        // Invia notifiche con emitter.send(notification);
-        return new SseEmitter();
+    // Endpoint SSE per inviare notifiche in tempo reale
+    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter handleSse(@AuthenticationPrincipal User user) {
+        if (user == null) {
+            throw new UnauthorizedException("User not authenticated");
+        }
+
+        SseEmitter emitter = new SseEmitter();
+        notificationService.subscribeToNotifications(user.getId(), emitter);
+
+
+        return emitter;
     }
 }
