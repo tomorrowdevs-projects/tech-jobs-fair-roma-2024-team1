@@ -56,17 +56,5 @@ public class NotificationsController {
         return new NotificationsResponseDTO(savedNotification.getId());
     }
 
-    // Endpoint SSE per inviare notifiche in tempo reale
-    @GetMapping(value = "/sse", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public SseEmitter handleSse(@AuthenticationPrincipal User user) {
-        if (user == null) {
-            throw new UnauthorizedException("User not authenticated");
-        }
 
-        SseEmitter emitter = new SseEmitter();
-        notificationService.subscribeToNotifications(user.getId(), emitter);
-
-
-        return emitter;
-    }
 }
