@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import team1.TJFHabitTrackerBE.entities.Habits;
 import team1.TJFHabitTrackerBE.entities.Notifications;
 import team1.TJFHabitTrackerBE.entities.User;
@@ -17,6 +18,7 @@ import team1.TJFHabitTrackerBE.payload.HabitsDTO.HabitsDTO;
 import team1.TJFHabitTrackerBE.payload.NotificationsDTO.NotificationsDTO;
 import team1.TJFHabitTrackerBE.repositories.NotificationsRepository;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -146,6 +148,11 @@ private void generateFrequencyDates(Habits habit, Frequency frequency) {
             Notifications savedNotification = notificationsRepository.save(notify);
             sendNotification(savedNotification);
         }
+    }
+    // Metodo per lo streaming in tempo reale delle notifiche via SSE
+    public Flux<Notifications> getNotificationsStream(String userId) {
+        return Flux.interval(Duration.ofSeconds(5)) // Ogni 5 secondi
+                .flatMap(i -> Flux.fromIterable(notificationsRepository.findNewNotificationsByUserId(userId)));
     }
 
 }

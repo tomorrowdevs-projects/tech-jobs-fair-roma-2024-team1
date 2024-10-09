@@ -4,6 +4,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import team1.TJFHabitTrackerBE.entities.Notifications;
 
 import java.time.LocalDateTime;
@@ -13,4 +14,5 @@ import java.util.UUID;
 public interface NotificationsRepository extends JpaRepository<Notifications, UUID> {
     List<Notifications> findByScheduledAtBeforeAndSentAtIsNull(LocalDateTime time);
     Page<Notifications> findByUserId(String userId, Pageable pageable);
+   Iterable<Notifications>  findNewNotificationsByUserId(String userId);
 }
