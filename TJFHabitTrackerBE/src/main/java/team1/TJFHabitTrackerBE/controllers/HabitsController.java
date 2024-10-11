@@ -72,10 +72,7 @@ public Page<Habits> getHabits(
 // delete habit
     @DeleteMapping("/{habitsId}")
     public void deleteHabits(@PathVariable UUID habitsId, @AuthenticationPrincipal User user) {
-        Habits habit = habitsService.findById(habitsId);
-        if (!habit.getOwner().getId().equals(user.getId())) {
-            throw new UnauthorizedException("You are not authorized to delete this habit.");
-        }
+    
 
         habitsService.deleteHabits(habitsId, user.getId());
 

@@ -183,7 +183,11 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
                 User newOwner = users.iterator().next();
                 habit.setOwner(newOwner);
             } else {
-                throw new BadRequestException("Cannot remove the owner as no other users are associated with the habit.");
+                List<Notifications> notifications = habit.getNotifications();
+                if (notifications != null && !notifications.isEmpty()) {
+                    notificationsRepository.deleteAll(notifications);
+                }
+                habitsRepository.delete(habit);
             }
         } else if (habit.getOwner() == null && removed) {
             // Se non c'è un proprietario, assegna la proprietà a un altro utente, se presente
