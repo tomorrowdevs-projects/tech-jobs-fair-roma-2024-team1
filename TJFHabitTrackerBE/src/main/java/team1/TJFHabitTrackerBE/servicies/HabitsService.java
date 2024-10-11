@@ -172,11 +172,12 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
         Set<User> users = habit.getUsers();
         boolean removed = users.remove(user);
 
-        // Gestisci la rimozione del proprietario
-        User currentOwner = habit.getOwner();
+
+
 
         // Verifica se l'attuale proprietario è l'utente che sta rimuovendo
-        if (currentOwner != null && currentOwner.getId().equals(userId)) {
+        if (habit.getOwner() != null && habit.getOwner().getId().equals(userId)) {
+
             if (!users.isEmpty()) {
                 // Assegna la proprietà a un altro utente
                 User newOwner = users.iterator().next();
@@ -184,7 +185,7 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
             } else {
                 throw new BadRequestException("Cannot remove the owner as no other users are associated with the habit.");
             }
-        } else if (currentOwner == null && removed) {
+        } else if (habit.getOwner() == null && removed) {
             // Se non c'è un proprietario, assegna la proprietà a un altro utente, se presente
             if (!users.isEmpty()) {
                 User newOwner = users.iterator().next();
