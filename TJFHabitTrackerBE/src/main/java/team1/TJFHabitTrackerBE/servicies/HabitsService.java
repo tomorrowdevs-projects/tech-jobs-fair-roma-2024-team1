@@ -160,47 +160,56 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
 
     //delete condizionato
 
-    public void deleteHabits(UUID id, String userId) {
+    public void deleteHabits(UUID habitId, String userId) {
         // Find the habit by ID
-        Habits found = this.findById(id);
+        Habits habit = habitsRepository.findById(habitId)
+                .orElseThrow(() -> new BadRequestException("Habit not found."));
 
-        // Check if the habit was found
-        if (found == null) {
-            throw new BadRequestException("Habit not found.");
-        }
+        // Verify the user exists
+        User user = userService.findById(userId);
 
-        // Get notifications associated with the habit
-        List<Notifications> notifications = found.getNotifications();
 
-        // Delete associated notifications if they exist
-        if (notifications != null && !notifications.isEmpty()) {
-            for (Notifications notification : notifications) {
-                notificationsRepository.delete(notification);
+
+        // Remove the user from the habit's user set
+        Set<User> users = habit.getUsers();
+        boolean removed = users.remove(user);
+
+        // Handle owner removal
+        User currentOwner = habit.getOwner();
+        if (currentOwner != null && currentOwner.getId().equals(userId)) {
+            if (!users.isEmpty()) {
+                // Assign ownership to another user
+                User newOwner = users.iterator().next();
+                habit.setOwner(newOwner);
+            } else {
+                // Decide on the appropriate action when no users are left
+                // Option 1: Prevent deleting the last owner
+                throw new BadRequestException("Cannot remove the owner as no other users are associated with the habit.");
+
+                // Option 2: Allow habits without an owner
+                // habit.setOwner(null);
             }
         }
 
-        // Get the list of users linked to the habit
-        List<User> userList = new ArrayList<>(found.getUsers().stream().toList());
-
-        // Remove the user from the habit's user list
-        boolean removed = userList.removeIf(user -> user.getId().equals(userId));
-if(userId.equals(found.getOwner().getId())){
-    found.setOwner(null);
-    habitsRepository.save(found);
-}
-        // Check if the user was found and removed
+        // Check if the user was associated with the habit
         if (!removed) {
             throw new BadRequestException("User not found in the habit.");
         }
 
-        // If no users are left, delete the habit
-        if (userList.isEmpty()) {
-            this.habitsRepository.delete(found);
+        if (users.isEmpty()) {
+            // Remove associated notifications
+            List<Notifications> notifications = habit.getNotifications();
+            if (notifications != null && !notifications.isEmpty()) {
+                notificationsRepository.deleteAll(notifications);
+            }
+            // No users left; delete the habit
+            habitsRepository.delete(habit);
         } else {
-            // If there are remaining users, update the habit's user list
-            found.setUsers((Set<User>) userList);
-            this.habitsRepository.save(found);
+            // Update the habit's user set
+            habit.setUsers(users);
+            habitsRepository.save(habit);
         }
+    }
 
     }
 
