@@ -211,7 +211,7 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
         }
     }
 
-    }
+
 
 
 // completa abitudine
