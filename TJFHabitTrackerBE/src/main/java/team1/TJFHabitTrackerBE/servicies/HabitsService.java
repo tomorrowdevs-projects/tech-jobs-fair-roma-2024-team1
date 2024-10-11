@@ -161,55 +161,64 @@ public Habits saveHabits(HabitsDTO body, String currentUserId) {
     //delete condizionato
 
     public void deleteHabits(UUID habitId, String userId) {
-        // Find the habit by ID
+        // Trova l'abitudine per ID
         Habits habit = habitsRepository.findById(habitId)
                 .orElseThrow(() -> new BadRequestException("Habit not found."));
 
-        // Verify the user exists
+        // Verifica che l'utente esista
         User user = userService.findById(userId);
 
-
-
-        // Remove the user from the habit's user set
+        // Rimuovi l'utente dal set di utenti associati all'abitudine
         Set<User> users = habit.getUsers();
         boolean removed = users.remove(user);
 
-        // Handle owner removal
+        // Gestisci la rimozione del proprietario
         User currentOwner = habit.getOwner();
+
+        // Verifica se l'attuale proprietario è l'utente che sta rimuovendo
         if (currentOwner != null && currentOwner.getId().equals(userId)) {
             if (!users.isEmpty()) {
-                // Assign ownership to another user
+                // Assegna la proprietà a un altro utente
                 User newOwner = users.iterator().next();
                 habit.setOwner(newOwner);
             } else {
-                // Decide on the appropriate action when no users are left
-                // Option 1: Prevent deleting the last owner
                 throw new BadRequestException("Cannot remove the owner as no other users are associated with the habit.");
-
-                // Option 2: Allow habits without an owner
-                // habit.setOwner(null);
+            }
+        } else if (currentOwner == null && removed) {
+            // Se non c'è un proprietario, assegna la proprietà a un altro utente, se presente
+            if (!users.isEmpty()) {
+                User newOwner = users.iterator().next();
+                habit.setOwner(newOwner);
+            } else {
+                // Se non ci sono altri utenti, l'abitudine può essere eliminata
+                List<Notifications> notifications = habit.getNotifications();
+                if (notifications != null && !notifications.isEmpty()) {
+                    notificationsRepository.deleteAll(notifications);
+                }
+                habitsRepository.delete(habit);
+                return; // Terminare l'operazione perché l'abitudine è stata eliminata
             }
         }
 
-        // Check if the user was associated with the habit
+        // Verifica se l'utente era associato all'abitudine
         if (!removed) {
             throw new BadRequestException("User not found in the habit.");
         }
 
         if (users.isEmpty()) {
-            // Remove associated notifications
+            // Se non ci sono più utenti associati, elimina le notifiche e l'abitudine
             List<Notifications> notifications = habit.getNotifications();
             if (notifications != null && !notifications.isEmpty()) {
                 notificationsRepository.deleteAll(notifications);
             }
-            // No users left; delete the habit
             habitsRepository.delete(habit);
         } else {
-            // Update the habit's user set
+            // Aggiorna il set di utenti dell'abitudine
             habit.setUsers(users);
             habitsRepository.save(habit);
         }
     }
+
 
 
 
